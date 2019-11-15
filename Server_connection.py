@@ -1,4 +1,5 @@
 import socket
+import json
 sock = socket.socket()
 sock.connect(('wgforge-srv.wargaming.net', 443))
 actions = {'LOGIN': 1, 'LOGOUT': 2, 'MOVE': 3, 'UPGRADE': 4, 'TURN': 5,
@@ -10,17 +11,8 @@ def message_to_server(action, **kwargs):
     action_message = bytearray()
     action_message += message_code.to_bytes(4, byteorder='little')
 
-    if len(kwargs) != 0:
-        json_msg = '{'
-        for key, value in kwargs.items():
-            if value is not None:
-                json_msg += '"' + key + '":'
-                if isinstance(value, str):
-                    json_msg += '"' + str(value) + '", '
-                else:
-                    json_msg += str(value) + ', '
-        json_msg = json_msg[:-2]
-        json_msg += '}'
+    if kwargs:
+        json_msg = json.dumps(kwargs)
         action_message += len(json_msg).to_bytes(4, byteorder='little')
         action_message.extend(json_msg.encode())
     else:
@@ -33,7 +25,7 @@ def message_to_server(action, **kwargs):
     response = sock.recv(response_length, socket.MSG_WAITALL)
     return {"result_code": result_code,
             "response_length": response_length,
-            "response": response.decode('utf-8')
+            "response": json.loads(response) if response else None
             }
 
 
