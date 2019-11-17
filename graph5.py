@@ -110,8 +110,8 @@ class RenderArea(QGraphicsView):
         self.scene().clear()
 
         for node, node_pos in pos.items():
-            pos[node] = [(self.width() // 2 + node_pos[0] * self.width() // 2),
-                         (self.height() - (self.height() // 2 + node_pos[1] * self.height() // 2))]
+            pos[node] = [(10*self.width() // 2 + 10*node_pos[0] * self.width() // 2),
+                         (10*self.height() - (10*self.height() // 2 + node_pos[1] * 10*self.height() // 2))]
 
         for node, node_pos in pos.items():
             best_node = BestNode(node, node_pos[0], node_pos[1], 35, 35)
