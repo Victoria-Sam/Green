@@ -70,7 +70,7 @@ def message_to_server(action, **kwargs):
             }
 
 
-result = message_to_server('LOGIN', name="Boris")
+#result = message_to_server('LOGIN', name="Boris")
 # print("Result code:", result["result_code"])
 # print("Response length:", result["response_length"])
 # print("Response:")
@@ -81,7 +81,7 @@ result = message_to_server('MAP', layer=0)
 # print("Response:")
 # print(result["response"])
 map_graph = JsonParser.json_to_graph(result)
-nx.draw(map_graph)
+#nx.draw(map_graph)
 plt.show()
 result = message_to_server('MAP', layer=1)
 # print("Result code:", result["result_code"])
@@ -111,4 +111,4 @@ result = message_to_server('UPGRADE', posts=[], trains=[1])
 # print("Response length:", result["response_length"])
 # print("Response:")
 # print(result["response"])
-sock.close()
+#sock.close()

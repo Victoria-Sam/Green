@@ -1,6 +1,7 @@
 import sys
 import json
 import os.path
+from Server_connection import message_to_server, JsonParser
 import networkx as nx
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
@@ -64,27 +65,16 @@ class GraphWidget(QWidget):
 
     def plot(self):
         self.figure.clf()
-        textboxValue = self.textbox.text()
-        if os.path.isfile(textboxValue):
-            with open(textboxValue) as json_file:
-                json_data = json.load(json_file)
-            nodes = json_data['points']
-            vertex = json_data['lines']
-            g = nx.Graph()
-            g.add_nodes_from([x['idx'] for x in nodes])
-            g.add_edges_from(
-                [x['points']+[{'length': x['length']}] for x in vertex]
-            )
-            nx.draw_kamada_kawai(g, with_labels=True, font_weight='bold')
-            edge_labels = {
-                (x[0], x[1]): x[2]['length'] for x in list(g.edges(data=True))
-            }
-            nx.draw_networkx_edge_labels(
-                g, pos=nx.kamada_kawai_layout(g),
-                edge_labels=edge_labels, label_pos=0.3
-            )
-        else:
-            plt.gcf().text(x=0.45, y=0.5, s='Wrong file path')
+        message_to_server('LOGIN', name="Boris")
+        g = JsonParser.json_to_graph(message_to_server('MAP', layer=0))
+        nx.draw_kamada_kawai(g, with_labels=True, font_weight='bold')
+        edge_labels = {
+            (x[0], x[1]): x[2]['length'] for x in list(g.edges(data=True))
+        }
+        nx.draw_networkx_edge_labels(
+            g, pos=nx.kamada_kawai_layout(g),
+            edge_labels=edge_labels, label_pos=0.3
+        )
         self.canvas.draw_idle()
 
     def center(self):
