@@ -72,4 +72,3 @@ def message_to_server(sock, action, **kwargs):
             "response_length": response_length,
             "response": json.loads(response) if response else None
             }
-

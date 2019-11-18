@@ -4,7 +4,7 @@ import os.path
 import socket
 from server_connection import message_to_server, JsonParser
 import networkx as nx
-from graph5 import RenderArea
+from graph_library import RenderArea
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
     QDesktopWidget, QGridLayout, QGraphicsScene, QGroupBox, QVBoxLayout,\
