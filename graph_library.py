@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout,
                              QPushButton, QLineEdit, QStyleFactory, QGraphicsScene, QFrame, QGraphicsView,
                              QGraphicsEllipseItem, QGraphicsDropShadowEffect, QGraphicsItem,
                              QGraphicsLineItem)
-
+colors = {0:QColor('#dbdbdb'), 1:QColor('#ad3636'), 2:QColor('#a1ad36'), 3:QColor('#38ad36')}
 
 class BestNode(QGraphicsEllipseItem):
     def __init__(self, number, *args, **kwargs):
@@ -106,7 +106,7 @@ class RenderArea(QGraphicsView):
         self.antialiased = antialiased
         self.update_view()
 
-    def draw_graph(self, pos, edge_labels):
+    def draw_graph(self, pos, edge_labels, types = {}):
         self.scene().clear()
 
         for node, node_pos in pos.items():
@@ -117,7 +117,7 @@ class RenderArea(QGraphicsView):
             best_node = BestNode(node, node_pos[0], node_pos[1], 35, 35)
 
             best_node.setPen(QPen(Qt.black, 2))
-            best_node.setBrush(QBrush(QColor('#dbdbdb')))
+            best_node.setBrush(QBrush(colors[types.get(node, 0)]))
 
             best_node_effect = QGraphicsDropShadowEffect(self)
             best_node_effect.setBlurRadius(5)
@@ -159,88 +159,3 @@ class RenderArea(QGraphicsView):
     def zoom_out(self):
         self.zoom /= 1.05
         self.update_view()
-
-
-class Window(QWidget):
-    def __init__(self):
-        super(Window, self).__init__()
-        self.init_UI()
-
-    def init_UI(self):
-
-        self.resize(1200, 675)
-        self.setMinimumSize(640, 480)
-        self.setWindowTitle('Magnificent Graph')
-        self.center_window()
-
-        self.scene = QGraphicsScene()
-        self.render_area = RenderArea(self.scene, self)
-        self.create_group_box_for_draw_graph_buttons()
-        self.create_group_box_for_support_buttons()
-
-        main_layout = QGridLayout()
-        main_layout.addWidget(self.render_area, 0, 0, 1, 4)
-        main_layout.addWidget(self.group_box_for_draw_graph_buttons, 1, 0, 1, 4)
-        main_layout.addWidget(self.group_box_for_support_buttons, 2, 0)
-
-        self.setLayout(main_layout)
-
-    def center_window(self):
-        frameGm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        centerPoint = QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
-
-    def create_group_box_for_draw_graph_buttons(self):
-        self.group_box_for_draw_graph_buttons = QGroupBox('Enter graph')
-        group_box_layout = QHBoxLayout()
-        group_box_layout.setSpacing(10)
-
-        self.graph_path_textbox = QLineEdit()
-        self.graph_path_textbox.setText('small_graph.json')
-        draw_button = QPushButton('Draw')
-        draw_button.clicked.connect(self.draw_graph)
-
-        group_box_layout.addWidget(self.graph_path_textbox)
-        group_box_layout.addWidget(draw_button)
-
-        self.group_box_for_draw_graph_buttons.setLayout(group_box_layout)
-
-    def create_group_box_for_support_buttons(self):
-        self.group_box_for_support_buttons = QGroupBox('Options')
-        group_box_layout = QHBoxLayout()
-        group_box_layout.setSpacing(10)
-
-        antialiasing_check_box = QCheckBox('Antialiasing')
-        antialiasing_check_box.toggled.connect(self.render_area.set_antialiased)
-        antialiasing_check_box.setChecked(True)
-
-        group_box_layout.addWidget(antialiasing_check_box)
-
-        self.group_box_for_support_buttons.setLayout(group_box_layout)
-
-    def draw_graph(self):
-        graph_path = self.graph_path_textbox.text()
-        if os.path.isfile(graph_path):
-
-            with open(graph_path) as json_file:
-                json_data = json.load(json_file)
-            nodes = json_data['points']
-            edges = json_data['lines']
-
-            graph = nx.Graph()
-            graph.add_nodes_from([node['idx'] for node in nodes])
-            graph.add_edges_from(
-                [edge['points'] + [{'length': edge['length']}] for edge in edges]
-            )
-
-            self.edge_labels = {
-                (edge[0], edge[1]): edge[2]['length'] for edge in list(graph.edges(data=True))
-            }
-
-            self.pos = nx.kamada_kawai_layout(graph)
-            self.render_area.draw_graph(self.pos, self.edge_labels)
-
-        else:
-            print('ERROR')

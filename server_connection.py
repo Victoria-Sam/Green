@@ -38,6 +38,16 @@ class JsonParser:
             return posts
         else:
             return None
+    @staticmethod
+    def json_to_posts_types(result):
+        if result["result_code"] == 0:
+            posts = {}
+            all_posts = result['response']['posts']
+            for x in all_posts:
+                posts[x['point_idx']] = x['type']
+            return posts
+        else:
+            return None
 
 
 def posts_to_posts_on_map(posts):

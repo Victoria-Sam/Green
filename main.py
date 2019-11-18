@@ -44,8 +44,9 @@ class GraphWidget(QWidget):
                 (edge[0], edge[1]):
                 edge[2]['length'] for edge in list(g.edges(data=True))
             }
+        types = JsonParser.json_to_posts_types(message_to_server(self.sock, 'MAP', layer=1))
         # print(self.render_area.width())
-        self.render_area.draw_graph(nx.kamada_kawai_layout(g), edge_labels)
+        self.render_area.draw_graph(nx.kamada_kawai_layout(g), edge_labels, types = types)
 
     def center_window(self):
         frameGm = self.frameGeometry()
