@@ -1,12 +1,16 @@
 import socket
 import json
 import networkx as nx
-import matplotlib.pyplot as plt
-sock = socket.socket()
-sock.connect(('wgforge-srv.wargaming.net', 443))
 action_types = {'LOGIN': 1, 'LOGOUT': 2, 'MOVE': 3, 'UPGRADE': 4, 'TURN': 5,
                 'PLAYER': 6, 'GAMES': 7, 'MAP': 10}
 post_types = {1: 'town', 2: 'market', 3: 'storage'}
+
+
+def print_server_message(result):
+    print("Result code:", result["result_code"])
+    print("Response length:", result["response_length"])
+    print("Response:")
+    print(result["response"])
 
 
 class JsonParser:
@@ -47,7 +51,7 @@ def posts_to_posts_on_map(posts):
     return posts_on_map
 
 
-def message_to_server(action, **kwargs):
+def message_to_server(sock, action, **kwargs):
     message_code = action_types[action]
     action_message = bytearray()
     action_message += message_code.to_bytes(4, byteorder='little')
@@ -69,46 +73,3 @@ def message_to_server(action, **kwargs):
             "response": json.loads(response) if response else None
             }
 
-
-#result = message_to_server('LOGIN', name="Boris")
-# print("Result code:", result["result_code"])
-# print("Response length:", result["response_length"])
-# print("Response:")
-# print(result["response"])
-result = message_to_server('MAP', layer=0)
-# print("Result code:", result["result_code"])
-# print("Response length:", result["response_length"])
-# print("Response:")
-# print(result["response"])
-map_graph = JsonParser.json_to_graph(result)
-#nx.draw(map_graph)
-plt.show()
-result = message_to_server('MAP', layer=1)
-# print("Result code:", result["result_code"])
-# print("Response length:", result["response_length"])
-# print("Response:")
-# print(result["response"])
-posts = JsonParser.json_to_posts(result)
-posts_on_map = posts_to_posts_on_map(posts)
-print(posts_on_map)
-result = message_to_server('MAP', layer=10)
-# print("Result code:", result["result_code"])
-# print("Response length:", result["response_length"])
-# print("Response:")
-# print(result["response"])
-result = message_to_server('GAMES')
-# print("Result code:", result["result_code"])
-# print("Response length:", result["response_length"])
-# print("Response:")
-# print(result["response"])
-result = message_to_server('TURN')
-# print("Result code:", result["result_code"])
-# print("Response length:", result["response_length"])
-# print("Response:")
-# print(result["response"])
-result = message_to_server('UPGRADE', posts=[], trains=[1])
-# print("Result code:", result["result_code"])
-# print("Response length:", result["response_length"])
-# print("Response:")
-# print(result["response"])
-#sock.close()
