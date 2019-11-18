@@ -1,6 +1,7 @@
 import socket
 import json
 import networkx as nx
+
 action_types = {'LOGIN': 1, 'LOGOUT': 2, 'MOVE': 3, 'UPGRADE': 4, 'TURN': 5,
                 'PLAYER': 6, 'GAMES': 7, 'MAP': 10}
 post_types = {1: 'town', 2: 'market', 3: 'storage'}
@@ -22,7 +23,7 @@ class JsonParser:
             g = nx.Graph()
             g.add_nodes_from([x['idx'] for x in nodes])
             g.add_edges_from(
-                [x['points']+[{'length': x['length']}] for x in edges]
+                [x['points'] + [{'length': x['length']}] for x in edges]
             )
             return g
         else:
