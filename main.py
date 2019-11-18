@@ -36,9 +36,10 @@ class GraphWidget(QWidget):
         main_layout = QGridLayout()
         main_layout.addWidget(self.render_area, 0, 0, 1, 4)
         self.setLayout(main_layout)
-        message_to_server(self.sock, 'LOGIN', name="Boris", )
+        message_to_server(self.sock, 'LOGIN', name="Boris"  )
         g = JsonParser.json_to_graph(
             message_to_server(self.sock, 'MAP', layer=0))
+        # print(message_to_server(self.sock, 'MAP', layer=1))
         edge_labels = {
                 (edge[0], edge[1]):
                 edge[2]['length'] for edge in list(g.edges(data=True))
@@ -69,4 +70,4 @@ if __name__ == '__main__':
     screen.show()
     screen.sock.close()
     sys.exit(app.exec_())
-    sock.close()
+
