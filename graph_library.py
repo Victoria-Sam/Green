@@ -1,17 +1,12 @@
-import json
-import os.path
-import sys
-
-import networkx as nx
 from PyQt5.QtCore import QSize, Qt, QLineF, QRectF, QMarginsF
 from PyQt5.QtGui import (QBrush, QPainter,
                          QPen, QColor, QTransform)
-from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout,
-                             QWidget, QGroupBox, QHBoxLayout,
-                             QPushButton, QLineEdit, QStyleFactory, QGraphicsScene, QFrame, QGraphicsView,
+from PyQt5.QtWidgets import (QApplication, QFrame, QGraphicsView,
                              QGraphicsEllipseItem, QGraphicsDropShadowEffect, QGraphicsItem,
                              QGraphicsLineItem)
-colors = {0:QColor('#dbdbdb'), 1:QColor('#ad3636'), 2:QColor('#a1ad36'), 3:QColor('#38ad36')}
+
+colors = {0: QColor('#dbdbdb'), 1: QColor('#ad3636'), 2: QColor('#a1ad36'), 3: QColor('#38ad36')}
+
 
 class BestNode(QGraphicsEllipseItem):
     def __init__(self, number, *args, **kwargs):
@@ -83,7 +78,8 @@ class RenderArea(QGraphicsView):
         super(RenderArea, self).__init__(scene, parent)
 
         self.setFrameStyle(QFrame.NoFrame)
-        self.antialiased = False
+        self.setMinimumSize(1150, 600)
+        self.antialiased = True
         self.zoom = 0.9
 
         render_palette = self.palette()
@@ -95,18 +91,11 @@ class RenderArea(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing, self.antialiased)
         self.setTransform(QTransform().scale(self.zoom, self.zoom))
 
-    def minimumSizeHint(self):
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        screen_geometry = QApplication.desktop().screenGeometry(screen)
-        screen_width = screen_geometry.width()
-        screen_height = screen_geometry.height()
-        return QSize(screen_width, screen_height)
-
     def set_antialiased(self, antialiased):
         self.antialiased = antialiased
         self.update_view()
 
-    def draw_graph(self, pos, edge_labels, types = {}):
+    def draw_graph(self, pos, edge_labels, types={}):
         self.scene().clear()
 
         for node, node_pos in pos.items():
