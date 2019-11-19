@@ -20,6 +20,7 @@ class BestNode(QGraphicsEllipseItem):
         super(BestNode, self).__init__(*args, **kwargs)
         self.number = number
         self.lines = []
+        self.icon = None
         self.setFlags(QGraphicsItem.ItemIsMovable)
         self.setFlags(QGraphicsItem.ItemSendsGeometryChanges)
 
@@ -27,11 +28,11 @@ class BestNode(QGraphicsEllipseItem):
         if change == QGraphicsItem.ItemPositionHasChanged:
             for line in self.lines:
                 new_pos = value + self.boundingRect().center()
-
                 if line.node_parent_1 == self:
                     line.setLine(QLineF(new_pos, line.line().p2()))
                 else:
                     line.setLine(QLineF(line.line().p1(), new_pos))
+            self.icon.setPos(new_pos.x() - 25, new_pos.y() - 25)
 
         return QGraphicsEllipseItem.itemChange(self, change, value)
 
@@ -42,18 +43,9 @@ class BestNode(QGraphicsEllipseItem):
         font.setPointSize(12)
         font.setBold(True)
         painter.setFont(font)
-
         painter.drawText(self.boundingRect(), Qt.AlignCenter, str(self.number))
 
         self.update()
-
-
-# class PostIcon(QGraphicsPixmapItem):
-#     def __init__(self, parent_node, *args, **kwargs):
-#         super(PostIcon, self).__init__(*args, **kwargs)
-#         self.parent_node = parent_node
-#         self.setFlags(QGraphicsItem.ItemIsMovable)
-#         self.setFlags(QGraphicsItem.ItemSendsGeometryChanges)
 
 
 class BestLine(QGraphicsLineItem):
@@ -136,6 +128,7 @@ class RenderArea(QGraphicsView):
                 pixmap = QGraphicsPixmapItem(pixmap.scaled(50, 50))
                 pixmap.setPos(node_pos[0] - 8, node_pos[1] - 8)
                 pixmap.setZValue(3)
+                best_node.icon = pixmap
                 self.scene().addItem(pixmap)
             self.scene().addItem(best_node)
 
