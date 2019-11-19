@@ -39,6 +39,7 @@ class JsonParser:
             return posts
         else:
             return None
+
     @staticmethod
     def json_to_posts_types(result):
         if result["result_code"] == 0:
