@@ -3,8 +3,8 @@ import sys
 
 import networkx as nx
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
-    QGridLayout, QGraphicsScene, QPushButton, QLineEdit, QDialog, QLabel, QGroupBox, QHBoxLayout, \
-    QCheckBox
+    QGridLayout, QGraphicsScene, QPushButton, QLineEdit, QDialog, QLabel,\
+    QGroupBox, QHBoxLayout, QCheckBox
 
 from graph_library import RenderArea
 from server_connection import message_to_server, JsonParser
@@ -44,12 +44,15 @@ class GraphWidget(QWidget):
             (edge[0], edge[1]):
                 edge[2]['length'] for edge in list(nx_graph.edges(data=True))
         }
-        types = JsonParser.json_to_posts_types(message_to_server(self.sock, 'MAP', layer=1))
-        self.render_area.draw_graph(nx.kamada_kawai_layout(nx_graph), edge_labels, types=types)
+        types = JsonParser.json_to_posts_types(
+            message_to_server(self.sock, 'MAP', layer=1))
+        self.render_area.draw_graph(
+            nx.kamada_kawai_layout(nx_graph), edge_labels, types=types)
 
     def __center_window(self):
         frameGm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        screen = QApplication.desktop().screenNumber(
+            QApplication.desktop().cursor().pos())
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
