@@ -32,7 +32,8 @@ class BestNode(QGraphicsEllipseItem):
                     line.setLine(QLineF(new_pos, line.line().p2()))
                 else:
                     line.setLine(QLineF(line.line().p1(), new_pos))
-            self.icon.setPos(new_pos.x() - 25, new_pos.y() - 25)
+            if self.icon is not None:
+                self.icon.setPos(new_pos.x() - 25, new_pos.y() - 25)
 
         return QGraphicsEllipseItem.itemChange(self, change, value)
 

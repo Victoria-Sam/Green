@@ -63,7 +63,7 @@ def posts_to_posts_on_map(posts):
     return posts_on_map
 
 
-def message_to_server(sock, action, **kwargs):
+def message_to_server(sock, action, json_mode=True, **kwargs):
     message_code = action_types[action]
     action_message = bytearray()
     action_message += message_code.to_bytes(4, byteorder='little')
@@ -82,5 +82,6 @@ def message_to_server(sock, action, **kwargs):
     response = sock.recv(response_length, socket.MSG_WAITALL)
     return {"result_code": result_code,
             "response_length": response_length,
-            "response": json.loads(response) if response else None
+            "response": json.loads(response) if response and json_mode else
+            response if response else None
             }
