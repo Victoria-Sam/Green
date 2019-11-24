@@ -1,13 +1,14 @@
-import socket
+import asyncio
 import sys
 
 import networkx as nx
+import quamash
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
-    QGridLayout, QGraphicsScene, QPushButton, QLineEdit, QDialog, QLabel,\
-    QGroupBox, QHBoxLayout, QCheckBox
+    QGridLayout, QGraphicsScene
 
+from Connection import Connection
+from bot_brains import BotBrains
 from graph_library import RenderArea
-from server_connection import message_to_server, JsonParser
 
 
 class GraphWidget(QWidget):
@@ -17,8 +18,7 @@ class GraphWidget(QWidget):
         self.user_name = 'Boris'
         self.user_password = 'password'
 
-        self.sock = socket.socket()
-        self.sock.connect(('wgforge-srv.wargaming.net', 443))
+        self.bot_brains = BotBrains(self, self.user_name)
 
         self.__init_ui()
 
@@ -36,18 +36,13 @@ class GraphWidget(QWidget):
 
         self.setLayout(main_layout)
 
-        message_to_server(self.sock, 'LOGIN', name=self.user_name)
-        nx_graph = JsonParser.json_to_graph(
-            message_to_server(self.sock, 'MAP', layer=0))
-        # print(message_to_server(self.sock, 'MAP', layer=1))
-        edge_labels = {
-            (edge[0], edge[1]):
-                edge[2]['length'] for edge in list(nx_graph.edges(data=True))
-        }
-        types = JsonParser.json_to_posts_types(
-            message_to_server(self.sock, 'MAP', layer=1))
-        self.render_area.draw_graph(
-            nx.kamada_kawai_layout(nx_graph), edge_labels, types=types)
+        self.bot_brains.start()
+
+    def draw_map0(self, nx_graph, edge_labels, types):
+        self.render_area.draw_graph(nx.kamada_kawai_layout(nx_graph), edge_labels, types)
+
+    def update_map1(self, map1):
+        self.render_area.update_map1(map1)
 
     def __center_window(self):
         frameGm = self.frameGeometry()
@@ -60,10 +55,17 @@ class GraphWidget(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.aboutToQuit.connect(app.deleteLater)
     app.setStyle(QStyleFactory.create("gtk"))
-    screen = GraphWidget()
-    screen.show()
-    app.exec_()
-    screen.sock.close()
+
+    loop = quamash.QEventLoop(app)
+    asyncio.set_event_loop(loop)
+
+    with loop:
+        screen = GraphWidget()
+        screen.show()
+        loop.run_forever()
+
+    Connection().close()
+    loop.stop()
+    loop.close()
     sys.exit()

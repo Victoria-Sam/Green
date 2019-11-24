@@ -63,7 +63,7 @@ def posts_to_posts_on_map(posts):
     return posts_on_map
 
 
-def message_to_server(sock, action, **kwargs):
+async def message_to_server(sock, action, **kwargs):
     message_code = action_types[action]
     action_message = bytearray()
     action_message += message_code.to_bytes(4, byteorder='little')
