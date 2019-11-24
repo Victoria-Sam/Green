@@ -30,7 +30,8 @@ class BotBrains:
             yield from self.update_map1()
 
     def close_bot(self):
-        self.__coroutine.cancel()
+        if self.__coroutine is not None:
+            self.__coroutine.cancel()
 
     async def move_trains(self):
         # пойми куда пойти

@@ -4,7 +4,7 @@ import sys
 import networkx as nx
 import quamash
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
-    QGridLayout, QGraphicsScene
+    QGridLayout, QGraphicsScene, QMessageBox
 
 from Connection import Connection
 from bot_brains import BotBrains
@@ -51,6 +51,10 @@ class GraphWidget(QWidget):
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
+
+    def closeEvent(self, event):
+        self.bot_brains.close_bot()
+        event.accept()
 
 
 if __name__ == '__main__':
