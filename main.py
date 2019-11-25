@@ -1,13 +1,13 @@
-import socket
 import sys
 
 import networkx as nx
+from PyQt5.QtCore import QThreadPool
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
-    QGridLayout, QGraphicsScene, QPushButton, QLineEdit, QDialog, QLabel,\
-    QGroupBox, QHBoxLayout, QCheckBox
+    QGridLayout, QGraphicsScene
 
+from Connection import Connection
+from bot_brains import BotBrains
 from graph_library import RenderArea
-from server_connection import message_to_server, JsonParser
 
 
 class GraphWidget(QWidget):
@@ -17,8 +17,7 @@ class GraphWidget(QWidget):
         self.user_name = 'Boris'
         self.user_password = 'password'
 
-        self.sock = socket.socket()
-        self.sock.connect(('wgforge-srv.wargaming.net', 443))
+        self.threadpool = QThreadPool()
 
         self.__init_ui()
 
@@ -36,18 +35,33 @@ class GraphWidget(QWidget):
 
         self.setLayout(main_layout)
 
-        message_to_server(self.sock, 'LOGIN', name=self.user_name)
-        nx_graph = JsonParser.json_to_graph(
-            message_to_server(self.sock, 'MAP', layer=0))
-        # print(message_to_server(self.sock, 'MAP', layer=1))
-        edge_labels = {
-            (edge[0], edge[1]):
-                edge[2]['length'] for edge in list(nx_graph.edges(data=True))
-        }
-        types = JsonParser.json_to_posts_types(
-            message_to_server(self.sock, 'MAP', layer=1))
-        self.render_area.draw_graph(
-            nx.kamada_kawai_layout(nx_graph), edge_labels, types=types)
+        self.start_bot()
+
+    def start_bot(self):
+        # Создаем бота в новом потоке
+        bot_btains = BotBrains(self.user_name)
+
+        # добавление действий на различные сигналы (finished и result возможно и пригодятся)
+        bot_btains.signals.finished.connect(self.thread_complete)
+        bot_btains.signals.result.connect(self.print_output)
+        bot_btains.signals.draw_map0.connect(self.draw_map0)
+        bot_btains.signals.update_map1.connect(self.update_map1)
+
+        # Стартуем бота
+        self.threadpool.start(bot_btains)
+
+    def print_output(self, s):
+        print(s)
+
+    def thread_complete(self):
+        print("THREAD COMPLETE!")
+
+    def draw_map0(self, l):
+        nx_graph, edge_labels, types = l[0], l[1], l[2]
+        self.render_area.draw_graph(nx.kamada_kawai_layout(nx_graph), edge_labels, types)
+
+    def update_map1(self, map1):
+        self.render_area.update_map1(map1)
 
     def __center_window(self):
         frameGm = self.frameGeometry()
@@ -57,13 +71,19 @@ class GraphWidget(QWidget):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
+    def closeEvent(self, event):
+        self.threadpool.clear()
+        event.accept()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.aboutToQuit.connect(app.deleteLater)
     app.setStyle(QStyleFactory.create("gtk"))
+
     screen = GraphWidget()
     screen.show()
     app.exec_()
-    screen.sock.close()
+
+    Connection().close()
     sys.exit()

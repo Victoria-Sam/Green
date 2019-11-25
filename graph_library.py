@@ -154,6 +154,10 @@ class RenderArea(QGraphicsView):
 
         self.update_view()
 
+    def update_map1(self, map1):
+        print('update map1')
+        pass
+
     def wheelEvent(self, event):
         moose = event.angleDelta().y() / 120
         if moose > 0:
