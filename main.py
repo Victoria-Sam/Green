@@ -5,8 +5,8 @@ from PyQt5.QtCore import QThreadPool
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
     QGridLayout, QGraphicsScene
 
-from Connection import Connection
-from bot_brains import BotBrains
+from connection import Connection
+from bot_brains_library import BotBrains
 from graph_library import RenderArea
 
 
@@ -39,16 +39,17 @@ class GraphWidget(QWidget):
 
     def start_bot(self):
         # Создаем бота в новом потоке
-        bot_btains = BotBrains(self.user_name)
+        bot_brains = BotBrains(self.user_name)
 
-        # добавление действий на различные сигналы (finished и result возможно и пригодятся)
-        bot_btains.signals.finished.connect(self.thread_complete)
-        bot_btains.signals.result.connect(self.print_output)
-        bot_btains.signals.draw_map0.connect(self.draw_map0)
-        bot_btains.signals.update_map1.connect(self.update_map1)
+        # добавление действий на различные сигналы
+        # (finished и result возможно и пригодятся)
+        bot_brains.signals.finished.connect(self.thread_complete)
+        bot_brains.signals.result.connect(self.print_output)
+        bot_brains.signals.draw_map0.connect(self.draw_map0)
+        bot_brains.signals.update_map1.connect(self.update_map1)
 
         # Стартуем бота
-        self.threadpool.start(bot_btains)
+        self.threadpool.start(bot_brains)
 
     def print_output(self, s):
         print(s)
@@ -58,7 +59,8 @@ class GraphWidget(QWidget):
 
     def draw_map0(self, l):
         nx_graph, edge_labels, types = l[0], l[1], l[2]
-        self.render_area.draw_graph(nx.kamada_kawai_layout(nx_graph), edge_labels, types)
+        self.render_area.draw_graph(nx.kamada_kawai_layout(nx_graph),
+                                    edge_labels, types)
 
     def update_map1(self, map1):
         self.render_area.update_map1(map1)

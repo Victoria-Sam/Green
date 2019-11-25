@@ -4,7 +4,7 @@ import traceback
 
 from PyQt5.QtCore import QObject, pyqtSignal, QRunnable, pyqtSlot
 
-from Connection import Connection
+from connection import Connection
 
 
 class BotBrainsSignals(QObject):
@@ -42,7 +42,7 @@ class BotBrains(QRunnable):
     '''
     BotBrains thread
 
-    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
+    Inherits from QRunnable to handler worker thread setup, signals and wrap-up
 
     :param user_name: string with user_name for login
 
@@ -66,12 +66,13 @@ class BotBrains(QRunnable):
         '''
         try:
             result = self.main_loop()
-        except:
+        except Exception:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
         else:
-            self.signals.result.emit(result)  # Return the result of the processing
+            self.signals.result.emit(result)
+            # Return the result of the processing
         finally:
             self.signals.finished.emit()  # Done
 
