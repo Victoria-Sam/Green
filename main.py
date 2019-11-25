@@ -1,10 +1,9 @@
-import asyncio
 import sys
 
 import networkx as nx
-import quamash
+from PyQt5.QtCore import QThreadPool
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
-    QGridLayout, QGraphicsScene, QMessageBox
+    QGridLayout, QGraphicsScene
 
 from Connection import Connection
 from bot_brains import BotBrains
@@ -18,7 +17,7 @@ class GraphWidget(QWidget):
         self.user_name = 'Boris'
         self.user_password = 'password'
 
-        self.bot_brains = BotBrains(self, self.user_name)
+        self.threadpool = QThreadPool()
 
         self.__init_ui()
 
@@ -36,9 +35,29 @@ class GraphWidget(QWidget):
 
         self.setLayout(main_layout)
 
-        self.bot_brains.start()
+        self.start_bot()
 
-    def draw_map0(self, nx_graph, edge_labels, types):
+    def start_bot(self):
+        # Создаем бота в новом потоке
+        bot_btains = BotBrains(self.user_name)
+
+        # добавление действий на различные сигналы (finished и result возможно и пригодятся)
+        bot_btains.signals.finished.connect(self.thread_complete)
+        bot_btains.signals.result.connect(self.print_output)
+        bot_btains.signals.draw_map0.connect(self.draw_map0)
+        bot_btains.signals.update_map1.connect(self.update_map1)
+
+        # Стартуем бота
+        self.threadpool.start(bot_btains)
+
+    def print_output(self, s):
+        print(s)
+
+    def thread_complete(self):
+        print("THREAD COMPLETE!")
+
+    def draw_map0(self, l):
+        nx_graph, edge_labels, types = l[0], l[1], l[2]
         self.render_area.draw_graph(nx.kamada_kawai_layout(nx_graph), edge_labels, types)
 
     def update_map1(self, map1):
@@ -53,23 +72,18 @@ class GraphWidget(QWidget):
         self.move(frameGm.topLeft())
 
     def closeEvent(self, event):
-        self.bot_brains.close_bot()
+        self.threadpool.clear()
         event.accept()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.aboutToQuit.connect(app.deleteLater)
     app.setStyle(QStyleFactory.create("gtk"))
 
-    loop = quamash.QEventLoop(app)
-    asyncio.set_event_loop(loop)
-
-    with loop:
-        screen = GraphWidget()
-        screen.show()
-        loop.run_forever()
+    screen = GraphWidget()
+    screen.show()
+    app.exec_()
 
     Connection().close()
-    loop.stop()
-    loop.close()
     sys.exit()

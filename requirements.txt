@@ -1,4 +1,3 @@
-quamash
 networkx
 PyQt5
 matplotlib

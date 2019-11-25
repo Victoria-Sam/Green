@@ -1,61 +1,131 @@
-import asyncio
+import sys
+import time
+import traceback
+
+from PyQt5.QtCore import QObject, pyqtSignal, QRunnable, pyqtSlot
+
 from Connection import Connection
 
 
-class BotBrains:
+class BotBrainsSignals(QObject):
+    '''
+    Defines the signals available from a running BotBrains thread.
 
-    def __init__(self, main_window, user_name):
+    Supported signals are:
+
+    finished
+        No data
+
+    error
+        `tuple` (exctype, value, traceback.format_exc() )
+
+    result
+        `object` data returned from processing, anything
+
+    draw_map0
+        `object` list that contains map0, edge_labels, map1
+        indicate when main window must draw graph
+
+    update_map1
+        `object` map1
+        indicate when main window must update map layer 1
+
+    '''
+    finished = pyqtSignal()
+    error = pyqtSignal(tuple)
+    result = pyqtSignal(object)
+    draw_map0 = pyqtSignal(object)
+    update_map1 = pyqtSignal(object)
+
+
+class BotBrains(QRunnable):
+    '''
+    BotBrains thread
+
+    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
+
+    :param user_name: string with user_name for login
+
+    '''
+
+    def __init__(self, user_name):
+        super(BotBrains, self).__init__()
+
+        # Add the callback signals
+        self.signals = BotBrainsSignals()
+
         self.connection = Connection()
-        self.main_window = main_window
-        self.__coroutine = None
         self.user_name = user_name
         self.map0 = None
         self.map1 = None
 
-    def start(self):
-        self.__coroutine = asyncio.ensure_future(self.main_loop())
+    @pyqtSlot()
+    def run(self):
+        '''
+        Initialise the runner function
+        '''
+        try:
+            result = self.main_loop()
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
 
-    @asyncio.coroutine
-    def init_bot(self):
-        yield from self.connection.login(self.user_name)
-        yield from self.draw_map0()
-
-    @asyncio.coroutine
     def main_loop(self):
-        yield from self.init_bot()
+        '''
+        Основный цикл бота: подвинь поезд, заверши ход, обнови карту
+        '''
+        self.init_bot()
 
+        '''
+        Пока что while True, потом до ивента с концом игры
+        '''
         while True:
-            yield from self.move_trains()
-            yield from self.turn()
-            yield from self.update_map1()
+            self.move_trains()
+            self.turn()
+            self.update_map1()
 
-    def close_bot(self):
-        if self.__coroutine is not None:
-            self.__coroutine.cancel()
+    def init_bot(self):
+        '''
+        Логинимся и рисуем начальную карту (0 и 1 слои)
+        '''
+        response = self.connection.login(self.user_name)
+        self.draw_map0()
 
-    async def move_trains(self):
+    def move_trains(self):
         # пойми куда пойти
         print('move train')
         pass
 
-    async def turn(self):
+    def turn(self):
         # пока надо, чтобы видеть как будет двигаться поезд
-        await asyncio.sleep(3)
+        time.sleep(2)
 
-        response = await self.connection.turn()
+        response = self.connection.turn()
         print('turn end')
 
-    async def draw_map0(self):
-        self.map0 = await self.connection.map0()
-        self.map1 = await self.connection.map1()
+    def draw_map0(self):
+        '''
+        Получаем 0 и 1 слои и посылаем сигнал в основной поток для рисования
+        '''
+        self.map0 = self.connection.map0()
+        self.map1 = self.connection.map1()
 
         edge_labels = {
             (edge[0], edge[1]):
                 edge[2]['length'] for edge in list(self.map0.edges(data=True))
         }
 
-        self.main_window.draw_map0(self.map0, edge_labels, self.map1)
+        # да-да, передается как говно
+        self.signals.draw_map0.emit([self.map0, edge_labels, self.map1])
 
-    async def update_map1(self):
-        self.map1 = await self.connection.map1()
-        self.main_window.update_map1(self.map1)
+    def update_map1(self):
+        '''
+        Получаем 1 слой и посылаем сигнал в основной поток для перерисовки
+        '''
+        self.map1 = self.connection.map1()
+        self.signals.update_map1.emit(self.map1)
