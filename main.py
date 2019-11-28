@@ -8,16 +8,12 @@ from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
 from connection import Connection
 from bot_brains_library import BotBrains
 from graph_library import RenderArea
+from game import Game
 
 
 class GraphWidget(QWidget):
     def __init__(self):
         super(GraphWidget, self).__init__()
-
-        self.user_name = 'Boris'
-        self.user_password = 'password'
-
-        self.threadpool = QThreadPool()
 
         self.__init_ui()
 
@@ -35,28 +31,6 @@ class GraphWidget(QWidget):
 
         self.setLayout(main_layout)
 
-        self.start_bot()
-
-    def start_bot(self):
-        # Создаем бота в новом потоке
-        bot_brains = BotBrains(self.user_name)
-
-        # добавление действий на различные сигналы
-        # (finished и result возможно и пригодятся)
-        bot_brains.signals.finished.connect(self.thread_complete)
-        bot_brains.signals.result.connect(self.print_output)
-        bot_brains.signals.draw_map0.connect(self.draw_map0)
-        bot_brains.signals.update_map1.connect(self.update_map1)
-
-        # Стартуем бота
-        self.threadpool.start(bot_brains)
-
-    def print_output(self, s):
-        print(s)
-
-    def thread_complete(self):
-        print("THREAD COMPLETE!")
-
     def draw_map0(self, l):
         nx_graph, edge_labels, types = l[0], l[1], l[2]
         self.render_area.draw_graph(nx.kamada_kawai_layout(nx_graph),
@@ -73,18 +47,14 @@ class GraphWidget(QWidget):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    def closeEvent(self, event):
-        self.threadpool.clear()
-        event.accept()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.aboutToQuit.connect(app.deleteLater)
     app.setStyle(QStyleFactory.create("gtk"))
-
     screen = GraphWidget()
     screen.show()
+    game = Game(app, screen)
     app.exec_()
 
     Connection().close()

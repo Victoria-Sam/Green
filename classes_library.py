@@ -36,6 +36,7 @@ class Post:
 class Home:
     home_id: int
     post_id: int
+    town: Town = None
 
 
 @dataclass

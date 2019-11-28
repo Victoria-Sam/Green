@@ -48,16 +48,12 @@ class BotBrains(QRunnable):
 
     '''
 
-    def __init__(self, user_name):
+    def __init__(self, game):
         super(BotBrains, self).__init__()
 
         # Add the callback signals
         self.signals = BotBrainsSignals()
-
-        self.connection = Connection()
-        self.user_name = user_name
-        self.map0 = None
-        self.map1 = None
+        self.game = game
 
     @pyqtSlot()
     def run(self):
@@ -92,9 +88,9 @@ class BotBrains(QRunnable):
 
     def init_bot(self):
         '''
-        Логинимся и рисуем начальную карту (0 и 1 слои)
+        Логинимся и рисуем начальную карту (0 слой)
         '''
-        response = self.connection.login(self.user_name)
+        response = self.game.connection.login(self.game.user_name)
         self.draw_map0()
 
     def move_trains(self):
@@ -106,27 +102,29 @@ class BotBrains(QRunnable):
         # пока надо, чтобы видеть как будет двигаться поезд
         time.sleep(2)
 
-        response = self.connection.turn()
+        response = self.game.connection.turn()
         print('turn end')
 
     def draw_map0(self):
         '''
         Получаем 0 и 1 слои и посылаем сигнал в основной поток для рисования
         '''
-        self.map0 = self.connection.map0()
-        self.map1 = self.connection.map1()
+        self.game.map0 = self.game.connection.map0()
+        self.game.map1 = self.game.connection.map1()
 
         edge_labels = {
             (edge[0], edge[1]):
-                edge[2]['length'] for edge in list(self.map0.edges(data=True))
+                edge[2]['length'] for edge in list(
+                    self.game.map0.edges(data=True))
         }
 
         # да-да, передается как говно
-        self.signals.draw_map0.emit([self.map0, edge_labels, self.map1])
+        self.signals.draw_map0.emit(
+            [self.game.map0, edge_labels, self.game.map1])
 
     def update_map1(self):
         '''
         Получаем 1 слой и посылаем сигнал в основной поток для перерисовки
         '''
-        self.map1 = self.connection.map1()
-        self.signals.update_map1.emit(self.map1)
+        self.game.map1 = self.game.connection.map1()
+        self.signals.update_map1.emit(self.game.map1)
