@@ -6,7 +6,7 @@ from classes_library import Map, Line, Point
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
-        points = []
+        self.points = points = []
         for idx in range(7):
             points.append(Point(idx=idx, post_id=0))
         edges = [
@@ -24,14 +24,18 @@ class MyTestCase(unittest.TestCase):
             Line(idx=12, length=3, points=[points[2], points[3]]),
         ]
         self.graph = Map(idx=0, lines=edges, name='Test', points=points)
-        self.start = points[0]
-        self.end = points[2]
 
-    def test_dijkstra(self):
-        result = the_best_way(self.graph, self.start, self.end)
+    def test_dijkstra1(self):
+        result = the_best_way(self.graph, self.points[0], self.points[2])
         self.assertEqual(result[0].idx, 3)
         self.assertEqual(result[1].idx, 10)
         self.assertEqual(result[2].idx, 11)
+
+    def test_dijkstra2(self):
+        result = the_best_way(self.graph, self.points[3], self.points[4])
+        self.assertEqual(result[0].idx, 12)
+        self.assertEqual(result[1].idx, 11)
+        self.assertEqual(result[2].idx, 10)
 
 
 if __name__ == '__main__':
