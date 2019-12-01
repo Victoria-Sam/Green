@@ -8,6 +8,19 @@ class Event:
 
 
 @dataclass
+class Point:
+    idx: int
+    post_id: int
+
+
+@dataclass
+class Line:
+    idx: int
+    length: int
+    points: List[Point]
+
+
+@dataclass
 class Map:
     idx: int
     lines: List[Line]
@@ -33,17 +46,24 @@ class Post:
 
 
 @dataclass
+class Town(Post):
+    armor: int
+    armor_capacity: int
+    level: int
+    next_level_price: int
+    player_id: str
+    population: int
+    population_capacity: int
+    product: int
+    product_capacity: int
+    train_cooldown: int
+
+
+@dataclass
 class Home:
     home_id: int
     post_id: int
     town: Town = None
-
-
-@dataclass
-class Line:
-    idx: int
-    length: int
-    points: List[int]
 
 
 @dataclass
@@ -61,30 +81,10 @@ class Storage(Post):
 
 
 @dataclass
-class Point:
-    idx: int
-    post_id: int
-
-
-@dataclass
 class PointWithCoordinates:
     idx: int
     x: int
     y: int
-
-
-@dataclass
-class Town(Post):
-    armor: int
-    armor_capacity: int
-    level: int
-    next_level_price: int
-    player_id: str
-    population: int
-    population_capacity: int
-    product: int
-    product_capacity: int
-    train_cooldown: int
 
 
 @dataclass
