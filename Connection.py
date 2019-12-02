@@ -1,4 +1,4 @@
-from server_connection import *
+from server_interaction_library import *
 
 
 class Connection:
@@ -10,14 +10,15 @@ class Connection:
         return cls.instance
 
     def login(self, name):
-        return message_to_server(self.sock, 'LOGIN', name=name)
+        return ResponseParser.response_to_player_response(
+            message_to_server(self.sock, 'LOGIN', name=name))
 
     def map0(self):
-        return JsonParser.json_to_graph(
+        return ResponseParser.response_to_map0_response(
             message_to_server(self.sock, 'MAP', layer=0))
 
     def map1(self):
-        return JsonParser.json_to_posts_types(
+        return ResponseParser.response_to_map1_response(
             message_to_server(self.sock, 'MAP', layer=1))
 
     def move(self, line_idx, speed, train_idx):
