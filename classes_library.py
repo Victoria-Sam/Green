@@ -61,6 +61,7 @@ class Town(Post):
     population_capacity: int
     product: int
     product_capacity: int
+
     # train_cooldown: int
 
 
