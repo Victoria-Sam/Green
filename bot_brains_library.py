@@ -6,7 +6,9 @@ import networkx as nx
 from PyQt5.QtCore import QObject, pyqtSignal, QRunnable, pyqtSlot
 
 from connection import Connection
-from classes_library import Line, Point, Graph, Map
+from classes_library import Line, Point, Graph, Map, Market, get_line, \
+    get_point
+from Dijkstra import the_best_way
 
 
 class BotBrainsSignals(QObject):
@@ -56,6 +58,9 @@ class BotBrains(QRunnable):
         # Add the callback signals
         self.signals = BotBrainsSignals()
         self.game = game
+        self.current_ways = {}
+        self.markets = None
+        self.market_train = {}
 
     @pyqtSlot()
     def run(self):
@@ -85,7 +90,8 @@ class BotBrains(QRunnable):
         '''
         while True:
             self.update_map1()
-            self.move_trains(1, 1, 1)
+            self.markets = filter(lambda x: isinstance(x, Market), self.game.posts)
+            self.find_trains_way()
             self.turn()
 
     def init_bot(self):
@@ -145,3 +151,46 @@ class BotBrains(QRunnable):
 
         response = self.game.connection.turn()
         print('turn end')
+
+    def next_line(self, train):
+        line = self.current_ways[train.train_id].pop(0)
+        if isinstance(line, list):
+            line = line[0]
+        if train.position == 0:
+            speed = 1
+        else:
+            speed = -1
+        self.move_trains(line.idx, speed, train.train_id)
+
+    def start_way(self, train):
+        shortest = 1000000000
+        best_way = None
+        best_market = None
+        for market in self.markets:
+            if not self.market_train.get(market.idx):
+                way = the_best_way(self.game.map.graph,
+                    get_point(self.game.map.graph, self.game.home.post_idx),
+                    get_point(self.game.map.graph, market.point_id))
+                way_length = sum(map(lambda x: x.length, way))
+                if way_length < shortest:
+                    best_way = way
+                    best_market = market
+        if best_way:
+            self.market_train[best_market.idx] = train.train_id
+            self.current_ways[train.train_id] = best_way
+            self.current_ways[train.train_id].append(best_way[::-1])
+            self.current_ways[train.train_id].append(best_market.idx)
+            self.next_line(train)
+
+    def find_trains_way(self):
+        for train in self.game.trains:
+            if self.current_ways.get(train.train_id):
+                if(train.speed == 0):
+                    if len(self.current_ways[train.train_id]) != 1:
+                        self.next_line(train)
+                    else:
+                        self.market_train.pop(self.current_ways[train.train_id].pop(0))
+                        self.current_ways.pop(train.train_id)
+                        self.start_way(train)
+            else:
+                self.start_way(train)

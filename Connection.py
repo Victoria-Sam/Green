@@ -19,7 +19,7 @@ class Connection:
 
     def map1(self):
         return ResponseParser.response_to_map1_response(
-            message_to_server(self.sock, 'MAP', layer=1))
+           message_to_server(self.sock, 'MAP', layer=1))
 
     def move(self, line_idx, speed, train_idx):
         return message_to_server(self.sock, 'MOVE', line_idx=line_idx,

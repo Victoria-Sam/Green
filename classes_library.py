@@ -26,6 +26,18 @@ class Graph:
     lines: List[Line]
 
 
+def get_point(graph, idx):
+    for x in graph.points:
+        if(x.idx == idx):
+            return x
+
+
+def get_line(graph, idx):
+    for x in graph.lines:
+        if(x.idx == idx):
+            return x
+
+
 @dataclass
 class Map:
     idx: int
