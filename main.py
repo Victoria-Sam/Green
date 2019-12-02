@@ -1,103 +1,61 @@
+import socket
 import sys
-import json
-import os.path
+
 import networkx as nx
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QStyleFactory, \
-    QDesktopWidget, QGridLayout, QGroupBox, QVBoxLayout, QPushButton,\
-    QLineEdit, QFileDialog
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg\
-    import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg \
-    import NavigationToolbar2QT as NavigationToolbar
+    QGridLayout, QGraphicsScene, QPushButton, QLineEdit, QDialog, QLabel,\
+    QGroupBox, QHBoxLayout, QCheckBox
+
+from graph_library import RenderArea
+from server_connection import message_to_server, JsonParser
 
 
 class GraphWidget(QWidget):
     def __init__(self):
         super(GraphWidget, self).__init__()
-        self.init_ui()
 
-    def init_ui(self):
-        self.setGeometry(100, 100, 1200, 675)
-        self.center()
-        self.setWindowTitle('Graph Plot')
-        grid = QGridLayout()
-        self.rows = 9
-        self.cols = 1
-        self.setLayout(grid)
-        self.create_vertical_group_box()
-        buttonLayout = QVBoxLayout()
-        buttonLayout.addWidget(self.verticalGroupBox)
-        self.figure = plt.figure()
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        grid.addWidget(self.toolbar, 0, 0)
-        grid.addWidget(self.canvas, 1, 0, 7, 1)
-        grid.addLayout(buttonLayout, 8, 0)
-        self.show()
+        self.user_name = 'Boris'
+        self.user_password = 'password'
 
-    def choose_file_and_plot(self):
-        self.textbox.setText(
-            QFileDialog.getOpenFileName(self, 'Open file', '/home')[0]
-        )
-        self.plot()
+        self.sock = socket.socket()
+        self.sock.connect(('wgforge-srv.wargaming.net', 443))
 
-    def create_vertical_group_box(self):
-        self.verticalGroupBox = QGroupBox()
-        layout = QVBoxLayout()
-        button = QPushButton('Build a graph by manually entered file path')
-        file_button = QPushButton(
-            'Select the path to the graph file using the '
-            + 'file manager and build the graph'
-        )
-        button.setObjectName('path_plot')
-        self.textbox = QLineEdit(self)
-        layout.addWidget(self.textbox)
-        layout.addWidget(button)
-        layout.addWidget(file_button)
-        layout.setSpacing(10)
-        self.verticalGroupBox.setLayout(layout)
-        button.clicked.connect(self.plot)
-        file_button.clicked.connect(self.choose_file_and_plot)
+        self.__init_ui()
 
-    def plot(self):
-        self.figure.clf()
-        textboxValue = self.textbox.text()
-        if os.path.isfile(textboxValue):
-            with open(textboxValue) as json_file:
-                json_data = json.load(json_file)
-            nodes = json_data['points']
-            vertex = json_data['lines']
-            g = nx.Graph()
-            g.add_nodes_from([x['idx'] for x in nodes])
-            g.add_edges_from(
-                [x['points']+[{'length': x['length']}] for x in vertex]
-            )
-            nx.draw_kamada_kawai(g, with_labels=True, font_weight='bold')
-            edge_labels = {
-                (x[0], x[1]): x[2]['length'] for x in list(g.edges(data=True))
-            }
-            nx.draw_networkx_edge_labels(
-                g, pos=nx.kamada_kawai_layout(g),
-                edge_labels=edge_labels, label_pos=0.3
-            )
-        else:
-            plt.gcf().text(x=0.45, y=0.5, s='Wrong file path')
-        self.canvas.draw_idle()
+    def __init_ui(self):
+        self.resize(1200, 675)
+        self.setMinimumSize(1200, 675)
+        self.setWindowTitle('Magnificent Graph')
+        self.__center_window()
 
-    def center(self):
-        qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
+        self.__scene = QGraphicsScene()
+        self.render_area = RenderArea(self.__scene, self)
 
-    def keyPressEvent(self, qKeyEvent):
-        if qKeyEvent.key() == Qt.Key_Return or qKeyEvent.key() == Qt.Key_Enter:
-            self.plot()
-        else:
-            super().keyPressEvent(qKeyEvent)
+        main_layout = QGridLayout()
+        main_layout.addWidget(self.render_area, 0, 0, 1, 4)
+
+        self.setLayout(main_layout)
+
+        message_to_server(self.sock, 'LOGIN', name=self.user_name)
+        nx_graph = JsonParser.json_to_graph(
+            message_to_server(self.sock, 'MAP', layer=0))
+        # print(message_to_server(self.sock, 'MAP', layer=1))
+        edge_labels = {
+            (edge[0], edge[1]):
+                edge[2]['length'] for edge in list(nx_graph.edges(data=True))
+        }
+        types = JsonParser.json_to_posts_types(
+            message_to_server(self.sock, 'MAP', layer=1))
+        self.render_area.draw_graph(
+            nx.kamada_kawai_layout(nx_graph), edge_labels, types=types)
+
+    def __center_window(self):
+        frameGm = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(
+            QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
 
 
 if __name__ == '__main__':
@@ -106,4 +64,6 @@ if __name__ == '__main__':
     app.setStyle(QStyleFactory.create("gtk"))
     screen = GraphWidget()
     screen.show()
-    sys.exit(app.exec_())
+    app.exec_()
+    screen.sock.close()
+    sys.exit()
