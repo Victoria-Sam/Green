@@ -21,11 +21,16 @@ class Line:
 
 
 @dataclass
+class Graph:
+    points: List[Point]
+    lines: List[Line]
+
+
+@dataclass
 class Map:
     idx: int
-    lines: List[Line]
     name: str
-    points: List[Point]
+    graph: Graph
 
 
 @dataclass
@@ -38,8 +43,8 @@ class Game:
 
 @dataclass
 class Post:
-    post_id: int
-    events: List[Event]
+    idx: int
+    # events: List[Event]
     name: str
     point_id: int
     post_type: int
@@ -49,20 +54,21 @@ class Post:
 class Town(Post):
     armor: int
     armor_capacity: int
-    level: int
-    next_level_price: int
+    # level: int
+    # next_level_price: int
     player_id: str
     population: int
     population_capacity: int
     product: int
     product_capacity: int
-    train_cooldown: int
+
+    # train_cooldown: int
 
 
 @dataclass
 class Home:
-    home_id: int
-    post_id: int
+    idx: int
+    post_idx: int
     town: Town = None
 
 
@@ -92,22 +98,23 @@ class Rating:
     idx: str
     name: str
     rating: int
+    town_name: str
 
 
 @dataclass
 class Train:
-    cooldown: int
-    events: List[Event]
-    fuel: int
-    fuel_capacity: int
-    fuel_consumption: int
+    # cooldown: int
+    # events: List[Event]
+    # fuel: int
+    # fuel_capacity: int
+    # fuel_consumption: int
     goods: int
     goods_capacity: int
     goods_type: int
     train_id: int
-    level: int
+    # level: int
     line_id: int
-    next_level_price: int
+    # next_level_price: int
     player_id: str
     position: int
     speed: int
@@ -153,7 +160,3 @@ class Map10Response(Response):
 @dataclass
 class GamesResponce(Response):
     games: List[Game]
-
-
-p = GamesResponce(0, 25, [Game('qweqwr', 4, 100, 2), Game('boris', 5, 50, 1)])
-print(p.games[1].name)
