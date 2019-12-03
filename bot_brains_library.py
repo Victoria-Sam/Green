@@ -147,11 +147,8 @@ class BotBrains(QRunnable):
         self.game.connection.move(line_idx, speed, train_idx)
 
     def turn(self):
-        # пока надо, чтобы видеть как будет двигаться поезд
-        time.sleep(2)
-
         response = self.game.connection.turn()
-        print('turn end')
+        # print('turn end')
 
     def next_line(self, train):
         line = self.current_ways[train.train_id].pop(0)
