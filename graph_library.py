@@ -12,7 +12,24 @@ colors = {0: QColor('#dbdbdb'),
           3: QColor('#38ad36')}
 icon_address = {1: 'icons/town.png',
                 2: 'icons/market.png',
-                3: 'icons/storage.png'}
+                3: 'icons/storage.png',
+                4: 'icons/train.png'}
+
+
+class QTrain(QGraphicsEllipseItem):
+    '''
+    Now train is showing as circle
+    red - our player train
+    blue - other player's trains
+    '''
+    def __init__(self, idx, *args, **kwargs):
+        super(QTrain, self).__init__(*args, **kwargs)
+        self.idx = idx
+        self.icon = None
+
+    def paint(self, painter, options, widget):
+        QGraphicsEllipseItem.paint(self, painter, options, widget)
+        self.update()
 
 
 class BestNode(QGraphicsEllipseItem):
@@ -21,20 +38,6 @@ class BestNode(QGraphicsEllipseItem):
         self.number = number
         self.lines = []
         self.icon = None
-        self.setFlags(QGraphicsItem.ItemIsMovable)
-        self.setFlags(QGraphicsItem.ItemSendsGeometryChanges)
-
-    def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionHasChanged:
-            for line in self.lines:
-                new_pos = value + self.boundingRect().center()
-                if line.node_parent_1 == self:
-                    line.setLine(QLineF(new_pos, line.line().p2()))
-                else:
-                    line.setLine(QLineF(line.line().p1(), new_pos))
-            self.icon.setPos(new_pos.x() - 25, new_pos.y() - 25)
-
-        return QGraphicsEllipseItem.itemChange(self, change, value)
 
     def paint(self, painter, options, widget):
         QGraphicsEllipseItem.paint(self, painter, options, widget)
@@ -49,13 +52,13 @@ class BestNode(QGraphicsEllipseItem):
 
 
 class BestLine(QGraphicsLineItem):
-    def __init__(self, node_parent_1, node_parent_2, weight, *args, **kwargs):
+    def __init__(self, node_parent_1, node_parent_2,
+                 weight, idx, *args, **kwargs):
         super(BestLine, self).__init__(*args, **kwargs)
         self.node_parent_1 = node_parent_1
         self.node_parent_2 = node_parent_2
         self.weight = weight
-        self.setFlags(QGraphicsItem.ItemIsMovable)
-        self.setFlags(QGraphicsItem.ItemSendsGeometryChanges)
+        self.idx = idx
 
     def paint(self, painter, options, widget):
         QGraphicsLineItem.paint(self, painter, options, widget)
@@ -101,7 +104,10 @@ class RenderArea(QGraphicsView):
         self.antialiased = antialiased
         self.update_view()
 
-    def draw_graph(self, pos, edge_labels, types={}):
+    def draw_graph(self, pos, edge_labels, game, types={}):
+        '''
+        Draw map and starting positions for trains
+        '''
         self.scene().clear()
 
         for node, node_pos in pos.items():
@@ -114,6 +120,7 @@ class RenderArea(QGraphicsView):
 
             best_node.setPen(QPen(Qt.black, 2))
             post_type = types.get(node, 0)
+
             best_node.setBrush(QBrush(colors[post_type]))
 
             best_node_effect = QGraphicsDropShadowEffect(self)
@@ -121,7 +128,6 @@ class RenderArea(QGraphicsView):
             best_node_effect.setOffset(3)
             best_node.setGraphicsEffect(best_node_effect)
             best_node.setZValue(2)
-            best_node.setFlag(QGraphicsItem.ItemIsMovable)
 
             if post_type != 0:
                 pixmap = QPixmap(icon_address[post_type])
@@ -132,7 +138,7 @@ class RenderArea(QGraphicsView):
                 self.scene().addItem(pixmap)
             self.scene().addItem(best_node)
 
-        for parent_nodes, weight in edge_labels.items():
+        for parent_nodes, info in edge_labels.items():
             best_nodes = list(filter(lambda scene_item: type(scene_item) ==
                               BestNode, self.scene().items()))
             node_parent_1 = list(filter(lambda best_node: best_node.number ==
@@ -140,9 +146,11 @@ class RenderArea(QGraphicsView):
             node_parent_2 = list(filter(lambda best_node: best_node.number ==
                                  parent_nodes[1], best_nodes))[0]
 
-            best_line = BestLine(node_parent_1, node_parent_2, weight,
-                                 QLineF(node_parent_1.boundingRect().center(),
-                                        node_parent_2.boundingRect().center()))
+            best_line = BestLine(
+                node_parent_1, node_parent_2, info[0], info[1],
+                QLineF(node_parent_1.boundingRect().center(),
+                       node_parent_2.boundingRect().center())
+            )
             best_line.setPen(QPen(Qt.black, 2))
             best_line.setZValue(1)
 
@@ -151,6 +159,87 @@ class RenderArea(QGraphicsView):
             node_parent_1.lines.append(best_line)
             node_parent_2.lines.append(best_line)
 
+        for train in game.trains:
+            lines = list(filter(lambda scene_item: type(scene_item) ==
+                                BestLine, self.scene().items()))
+            for line in lines:
+                if line.idx == train.line_id:
+                    current_line = line
+                    break
+            start_coords = [current_line.node_parent_1.rect().center().x(),
+                            current_line.node_parent_1.rect().center().y()]
+            end_coords = [current_line.node_parent_2.rect().center().x(),
+                          current_line.node_parent_2.rect().center().y()]
+            train_coords = [
+                start_coords[0] + train.position *
+                (end_coords[0] - start_coords[0]) / current_line.weight,
+                start_coords[1] + train.position *
+                (end_coords[1] - start_coords[1]) / current_line.weight
+                ]
+            train_size = 20
+            offset = 6
+            train_visual = QTrain(
+                train.train_id,
+                train_coords[0] - train_size/2 - offset/2,
+                train_coords[1] - train_size/2 - offset/2,
+                train_size + offset,
+                train_size + offset)
+            train_pixmap = QPixmap(icon_address[4])
+            train_pixmap = QGraphicsPixmapItem(
+                train_pixmap.scaled(train_size, train_size))
+            train_pixmap.setPos(train_coords[0] - train_size/2,
+                                train_coords[1] - train_size/2,)
+            train_pixmap.setZValue(11)
+            train_visual.icon = train_pixmap
+            train_visual.setZValue(10)
+            pen = QPen(QColor("red"))
+            pen.setWidth(1)
+            if train.player_id == game.player_id:
+                train_visual.setPen(pen)
+            else:
+                pen.setColor(QColor("blue"))
+                train_visual.setPen(pen)
+            self.scene().addItem(train_visual)
+            self.scene().addItem(train_pixmap)
+
+        self.update_view()
+
+    def update_map1(self, game):
+        '''
+        Set new trains positions each turn
+        '''
+        all_trains = list(filter(lambda scene_item: type(scene_item) ==
+                                 QTrain, self.scene().items()))
+        lines = list(filter(lambda scene_item: type(scene_item) ==
+                            BestLine, self.scene().items()))
+        train_size = 20
+        offset = 6
+        for train in game.trains:
+            train_on_map = [x for x in all_trains if x.idx == train.train_id]
+            for line in lines:
+                if line.idx == train.line_id:
+                    current_line = line
+                    break
+            start_coords = [current_line.node_parent_1.rect().center().x(),
+                            current_line.node_parent_1.rect().center().y()]
+            end_coords = [current_line.node_parent_2.rect().center().x(),
+                          current_line.node_parent_2.rect().center().y()]
+            train_coords = [
+                start_coords[0] + train.position *
+                (end_coords[0] - start_coords[0]) / current_line.weight,
+                start_coords[1] + train.position *
+                (end_coords[1] - start_coords[1]) / current_line.weight
+                ]
+            train_on_map[0].setPos(
+                train_coords[0] - train_size/2 - offset/2 -
+                train_on_map[0].rect().x(),
+                train_coords[1] - train_size/2 - offset/2 -
+                train_on_map[0].rect().y()
+            )
+            train_on_map[0].icon.setPos(
+                train_coords[0] - train_size/2,
+                train_coords[1] - train_size/2
+            )
         self.update_view()
 
     def wheelEvent(self, event):
