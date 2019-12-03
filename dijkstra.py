@@ -5,10 +5,10 @@ from heapq import heappop, heappush
 class PriorityQueue:
 
     def __init__(self):
-        self.pq = []                         # list of entries arranged in a heap
-        self.entry_finder = {}               # mapping of points to entries
-        self.REMOVED = '<removed-point>'     # placeholder for a removed point
-        self.counter = itertools.count()     # unique sequence count
+        self.pq = []                        # list of entries arranged in a
+        self.entry_finder = {}              # heap mapping of points to entries
+        self.REMOVED = '<removed-point>'    # placeholder for a removed point
+        self.counter = itertools.count()    # unique sequence count
 
     def add_point(self, point, priority):
         """Add a new task or update the priority of an existing task"""
@@ -25,7 +25,9 @@ class PriorityQueue:
         entry[-1] = self.REMOVED
 
     def pop_point(self):
-        """Remove and return the lowest priority point. Raise KeyError if empty."""
+        """
+        Remove and return the lowest priority point. Raise KeyError if empty.
+        """
         while self.pq:
             priority, count, point = heappop(self.pq)
             if point is not self.REMOVED:
@@ -57,7 +59,8 @@ def the_best_way(graph, start_point, end_point):
         list_of_marks[index_of_start] = True
         for edge in adjacency_list[index_of_start]:
             start = graph.points[index_of_start]
-            index_of_neighbour = graph.points.index(edge.points[0 if edge.points[1] == start else 1])
+            index_of_neighbour = graph.points.index(
+                edge.points[0 if edge.points[1] == start else 1])
             new_path_length = edge.length + list_of_dist[index_of_start]
             if new_path_length < list_of_dist[index_of_neighbour]:
                 list_of_edge_to[index_of_neighbour] = edge
@@ -68,6 +71,7 @@ def the_best_way(graph, start_point, end_point):
         idx_end_point = graph.points.index(end_point)
         part_of_the_way = list_of_edge_to[idx_end_point]
         shortest_way.append(part_of_the_way)
-        intermediate_point = part_of_the_way.points[0 if part_of_the_way.points[1] == end_point else 1]
+        intermediate_point = part_of_the_way.points[
+            0 if part_of_the_way.points[1] == end_point else 1]
         end_point = intermediate_point
     return shortest_way[::-1]

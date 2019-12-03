@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QRunnable, pyqtSlot
 from connection import Connection
 from classes_library import Line, Point, Graph, Map, Market, get_line, \
     get_point
-from Dijkstra import the_best_way
+from dijkstra import the_best_way
 
 
 class BotBrainsSignals(QObject):
@@ -90,7 +90,8 @@ class BotBrains(QRunnable):
         '''
         while True:
             self.update_map1()
-            self.markets = filter(lambda x: isinstance(x, Market), self.game.posts)
+            self.markets = filter(
+                lambda x: isinstance(x, Market), self.game.posts)
             self.find_trains_way()
             self.turn()
 
@@ -157,8 +158,9 @@ class BotBrains(QRunnable):
         if isinstance(line, list):
             line = line[0]
         train_line = get_line(self.game.map.graph, train.line_id)
-        train_point = train_line.points[0] if train.position == 0 else train_line.points[1]
-        if get_line(self.game.map.graph, line.idx).points[0].idx == train_point.idx:
+        train_point = train_line.points[0 if train.position == 0 else 1]
+        if get_line(self.game.map.graph, line.idx).points[0].idx == \
+                train_point.idx:
             speed = 1
         else:
             speed = -1
@@ -170,9 +172,11 @@ class BotBrains(QRunnable):
         best_market = None
         for market in self.markets:
             if not self.market_train.get(market.idx):
-                way = the_best_way(self.game.map.graph,
+                way = the_best_way(
+                    self.game.map.graph,
                     get_point(self.game.map.graph, self.game.home.post_idx),
-                    get_point(self.game.map.graph, market.point_id))
+                    get_point(self.game.map.graph, market.point_id)
+                )
                 way_length = sum(map(lambda x: x.length, way))
                 if way_length < shortest:
                     best_way = way
@@ -191,7 +195,8 @@ class BotBrains(QRunnable):
                     if len(self.current_ways[train.train_id]) != 1:
                         self.next_line(train)
                     else:
-                        self.market_train.pop(self.current_ways[train.train_id].pop(0))
+                        self.market_train.pop(
+                            self.current_ways[train.train_id].pop(0))
                         self.current_ways.pop(train.train_id)
                         self.start_way(train)
             else:

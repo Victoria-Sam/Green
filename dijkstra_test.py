@@ -1,5 +1,5 @@
 import unittest
-from Dijkstra import the_best_way
+from dijkstra import the_best_way
 from classes_library import Map, Line, Point, Graph
 
 
@@ -26,7 +26,7 @@ class MyTestCase(unittest.TestCase):
         self.graph = Map(idx=0, graph=Graph(points, edges), name='Test')
 
     def test_dijkstra1(self):
-        result = the_best_way(self.graph, Point(0, 0), Point(2,0))
+        result = the_best_way(self.graph, Point(0, 0), Point(2, 0))
         print(result)
         self.assertEqual(result[0].idx, 3)
         self.assertEqual(result[1].idx, 10)
