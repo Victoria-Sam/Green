@@ -156,7 +156,9 @@ class BotBrains(QRunnable):
         line = self.current_ways[train.train_id].pop(0)
         if isinstance(line, list):
             line = line[0]
-        if train.position == 0:
+        train_line = get_line(self.game.map.graph, train.line_id)
+        train_point = train_line.points[0] if train.position == 0 else train_line.points[1]
+        if get_line(self.game.map.graph, line.idx).points[0].idx == train_point.idx:
             speed = 1
         else:
             speed = -1
