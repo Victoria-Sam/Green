@@ -12,7 +12,8 @@ colors = {0: QColor('#dbdbdb'),
           3: QColor('#38ad36')}
 icon_address = {1: 'icons/town.png',
                 2: 'icons/market.png',
-                3: 'icons/storage.png'}
+                3: 'icons/storage.png',
+                4: 'icons/train.png'}
 
 
 class QTrain(QGraphicsEllipseItem):
@@ -175,18 +176,31 @@ class RenderArea(QGraphicsView):
                 start_coords[1] + train.position *
                 (end_coords[1] - start_coords[1]) / current_line.weight
                 ]
+            train_size = 20
+            offset = 6
             train_visual = QTrain(
-                train.train_id, train_coords[0] - 5,
-                train_coords[1] - 5, 10, 10)
+                train.train_id,
+                train_coords[0] - train_size/2 - offset/2,
+                train_coords[1] - train_size/2 - offset/2,
+                train_size + offset,
+                train_size + offset)
+            train_pixmap = QPixmap(icon_address[4])
+            train_pixmap = QGraphicsPixmapItem(
+                train_pixmap.scaled(train_size, train_size))
+            train_pixmap.setPos(train_coords[0] - train_size/2,
+                                train_coords[1] - train_size/2,)
+            train_pixmap.setZValue(11)
+            train_visual.icon = train_pixmap
             train_visual.setZValue(10)
             pen = QPen(QColor("red"))
-            pen.setWidth(5)
+            pen.setWidth(1)
             if train.player_id == game.player_id:
                 train_visual.setPen(pen)
             else:
                 pen.setColor(QColor("blue"))
                 train_visual.setPen(pen)
             self.scene().addItem(train_visual)
+            self.scene().addItem(train_pixmap)
 
         self.update_view()
 
@@ -198,6 +212,8 @@ class RenderArea(QGraphicsView):
                                  QTrain, self.scene().items()))
         lines = list(filter(lambda scene_item: type(scene_item) ==
                             BestLine, self.scene().items()))
+        train_size = 20
+        offset = 6
         for train in game.trains:
             train_on_map = [x for x in all_trains if x.idx == train.train_id]
             for line in lines:
@@ -215,8 +231,14 @@ class RenderArea(QGraphicsView):
                 (end_coords[1] - start_coords[1]) / current_line.weight
                 ]
             train_on_map[0].setPos(
-                train_coords[0] - 5 - train_on_map[0].rect().x(),
-                train_coords[1] - 5 - train_on_map[0].rect().y()
+                train_coords[0] - train_size/2 - offset/2 -
+                train_on_map[0].rect().x(),
+                train_coords[1] - train_size/2 - offset/2 -
+                train_on_map[0].rect().y()
+            )
+            train_on_map[0].icon.setPos(
+                train_coords[0] - train_size/2,
+                train_coords[1] - train_size/2
             )
         self.update_view()
 
