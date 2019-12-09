@@ -2,9 +2,41 @@ from dataclasses import dataclass
 from typing import List, Dict
 
 
+event_types = {
+    "TRAIN_COLLISION": 1,
+    "HIJACKERS_ASSAULT": 2,
+    "PARASITES_ASSAULT": 3,
+    "REFUGEES_ARRIVAL": 4,
+    "RESOURCE_OVERFLOW": 5,
+    "RESOURCE_LACK": 6,
+    "GAME_OVER": 100
+}
+
+
 @dataclass
 class Event:
     event_type: int
+    tick: int
+
+
+@dataclass
+class TrainCollisionEvent(Event):
+    second_train_id: int
+
+
+@dataclass
+class ParasitesAssaultEvent(Event):
+    parasites_power: int
+
+
+@dataclass
+class HijackersAssaultEvent(Event):
+    hijackers_power: int
+
+
+@dataclass
+class RefugeesArrivalEvent(Event):
+    refugees_number: int
 
 
 @dataclass
@@ -56,7 +88,7 @@ class Game:
 @dataclass
 class Post:
     idx: int
-    # events: List[Event]
+    events: List[Event]
     name: str
     point_id: int
     post_type: int
@@ -66,8 +98,8 @@ class Post:
 class Town(Post):
     armor: int
     armor_capacity: int
-    # level: int
-    # next_level_price: int
+    level: int
+    next_level_price: int
     player_id: str
     population: int
     population_capacity: int
@@ -124,9 +156,9 @@ class Train:
     goods_capacity: int
     goods_type: int
     train_id: int
-    # level: int
+    level: int
     line_id: int
-    # next_level_price: int
+    next_level_price: int
     player_id: str
     position: int
     speed: int

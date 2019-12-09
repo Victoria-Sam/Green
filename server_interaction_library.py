@@ -1,14 +1,22 @@
 import socket
 import json
 import networkx as nx
-from classes_library import Response, Map0Response, Map10Response,\
-    Map1Response, PlayerResponse, Map, Point, Line, Graph, Town, Market,\
-    Storage, Rating, Train, Home
+from classes_library import *
+#     Response, Map0Response, Map10Response,\
+#     Map1Response, PlayerResponse, Map, Point, Line, Graph, Town, Market,\
+#     Storage, Rating, Train, Home, Event, TrainCollisionEvent
+
 from typing import List
 
 action_types = {'LOGIN': 1, 'LOGOUT': 2, 'MOVE': 3, 'UPGRADE': 4, 'TURN': 5,
                 'PLAYER': 6, 'GAMES': 7, 'MAP': 10}
 post_types = {1: 'town', 2: 'market', 3: 'storage'}
+event_classes = {
+    1: TrainCollisionEvent,
+    2: HijackersAssaultEvent,
+    3: ParasitesAssaultEvent,
+    4: RefugeesArrivalEvent
+}
 
 
 def print_server_message(result):
@@ -56,23 +64,38 @@ class ResponseParser:
         all_posts = resp["posts"]  # list of post dicts
         all_ratings = resp["ratings"]
         all_trains = resp["trains"]
+
         posts = list()
         ratings = dict()
         trains = list()
 
         for post in all_posts:  # post = 1 dict from list
+            events = list()
+            all_events = post["events"]
+            for event in all_events:
+                for key, value in devent.items():
+                    if key == "type":
+                        temp_type = value
+                    elif key == tick:
+                        temp_tick = value
+                    else:
+                        temp_event_param = value
+                temp_event = event_types[event["type"]](
+                    temp_type, temp_tick, temp_event_param
+                    )
+                events.append(temp_event)
             if post["type"] == 1:
                 temp_posts_types[post["point_idx"]] = 1
                 temp_town = Town(
                     post["idx"],
-                    # post["events"],
+                    post["events"],
                     post["name"],
                     post["point_idx"],
                     post["type"],
                     post["armor"],
                     post["armor_capacity"],
-                    # post["level"],
-                    # post["next_level_price"],
+                    post["level"],
+                    post["next_level_price"],
                     post["player_idx"],
                     post["population"],
                     post["population_capacity"],
@@ -85,7 +108,7 @@ class ResponseParser:
                 temp_posts_types[post["point_idx"]] = 2
                 temp_market = Market(
                     post["idx"],
-                    # post["events"],
+                    post["events"],
                     post["name"],
                     post["point_idx"],
                     post["type"],
@@ -113,12 +136,20 @@ class ResponseParser:
                                             rating["rating"], rating["town"])
 
         for train in all_trains:
+            # temp_events = list()
+            # for event in train["events"]:
+            #     temp_events.append(TrainCollisionEvent(1, event["tick"],
+            #                        event["train"]))
             temp_train = Train(
+                    # train["cooldown"],
+                    # temp_events,
                     train["goods"],
                     train["goods_capacity"],
                     train["goods_type"],
                     train["idx"],
+                    train["level"],
                     train["line_idx"],
+                    train["next_level_price"],
                     train["player_idx"],
                     train["position"],
                     train["speed"]
@@ -137,16 +168,30 @@ class ResponseParser:
         resp = result["response"]
 
         town_info = resp["town"]
+        events = list()
+        all_events = town_info["events"]
+        for event in all_events:
+            for key, value in devent.items():
+                if key == "type":
+                    temp_type = value
+                elif key == tick:
+                    temp_tick = value
+                else:
+                    temp_event_param = value
+            temp_event = event_types[event["type"]](
+                temp_type, temp_tick, temp_event_param
+                )
+            events.append(temp_event)
         temp_town = Town(
                     town_info["idx"],
-                    # town_info["events"],
+                    town_info["events"],
                     town_info["name"],
                     town_info["point_idx"],
                     town_info["type"],
                     town_info["armor"],
                     town_info["armor_capacity"],
-                    # town_info["level"],
-                    # town_info["next_level_price"],
+                    town_info["level"],
+                    town_info["next_level_price"],
                     town_info["player_idx"],
                     town_info["population"],
                     town_info["population_capacity"],
@@ -161,12 +206,20 @@ class ResponseParser:
 
         trains = list()
         for train in resp["trains"]:
+            # temp_events = list()
+            # for event in train["events"]:
+            #     temp_events.append(TrainCollisionEvent(1, event["tick"],
+            #                        event["train"]))
             temp_train = Train(
+                    # train["cooldown"],
+                    # temp_events,
                     train["goods"],
                     train["goods_capacity"],
                     train["goods_type"],
                     train["idx"],
+                    train["level"],
                     train["line_idx"],
+                    train["next_level_price"],
                     train["player_idx"],
                     train["position"],
                     train["speed"]
