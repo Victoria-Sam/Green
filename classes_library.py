@@ -40,6 +40,12 @@ class RefugeesArrivalEvent(Event):
 
 
 @dataclass
+class ResourceLackEvent(Event):
+    product: int = None
+    armor: int = None
+
+
+@dataclass
 class Point:
     idx: int
     post_id: int

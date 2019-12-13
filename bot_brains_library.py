@@ -171,7 +171,7 @@ class BotBrains(QRunnable):
             if not self.market_train.get(market.idx):
                 way = the_best_way(
                     self.game.map.graph,
-                    get_point(self.game.map.graph, self.game.home.post_idx),
+                    get_point(self.game.map.graph, self.game.home.idx),
                     get_point(self.game.map.graph, market.point_id)
                 )
                 way_length = sum(map(lambda x: x.length, way))

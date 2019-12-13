@@ -15,7 +15,8 @@ event_classes = {
     1: TrainCollisionEvent,
     2: HijackersAssaultEvent,
     3: ParasitesAssaultEvent,
-    4: RefugeesArrivalEvent
+    4: RefugeesArrivalEvent,
+    6: ResourceLackEvent
 }
 
 
@@ -73,16 +74,32 @@ class ResponseParser:
             events = list()
             all_events = post["events"]
             for event in all_events:
-                for key, value in devent.items():
+                for key, value in event.items():
                     if key == "type":
                         temp_type = value
-                    elif key == tick:
+                    elif key == "tick":
                         temp_tick = value
                     else:
                         temp_event_param = value
-                temp_event = event_types[event["type"]](
-                    temp_type, temp_tick, temp_event_param
-                    )
+                        if key == "product":
+                            type_6_product = True
+                            type_6_armor = False
+                        elif key == "armor":
+                            type_6_product = False
+                            type_6_armor = True
+                if temp_type == 6:
+                    if type_6_product is True:
+                        temp_event = event_classes[event["type"]](
+                            temp_type, temp_tick, temp_event_param, None
+                        )
+                    else:
+                        temp_event = event_classes[event["type"]](
+                            temp_type, temp_tick, None, temp_event_param
+                        )
+                else:
+                    temp_event = event_classes[event["type"]](
+                        temp_type, temp_tick, temp_event_param
+                        )
                 events.append(temp_event)
             if post["type"] == 1:
                 temp_posts_types[post["point_idx"]] = 1
@@ -171,7 +188,7 @@ class ResponseParser:
         events = list()
         all_events = town_info["events"]
         for event in all_events:
-            for key, value in devent.items():
+            for key, value in event.items():
                 if key == "type":
                     temp_type = value
                 elif key == tick:

@@ -38,6 +38,12 @@ class BestNode(QGraphicsEllipseItem):
         self.number = number
         self.lines = []
         self.icon = None
+        self.population_icon = None
+        self.population_text = None
+        self.armor_icon = None
+        self.armor_text = None
+        self.product_icon = None
+        self.product_text = None
 
     def paint(self, painter, options, widget):
         QGraphicsEllipseItem.paint(self, painter, options, widget)
