@@ -258,6 +258,30 @@ class ResponseParser:
         )
         return player_response
 
+    @staticmethod
+    def response_to_upgrade_response(result) -> UpgradeResponse:
+        if result["result_code"] == 0:
+            return UpgradeResponse(0, 0)
+        else:
+            UpgrradeResponse(result["result_code"], result["response_length"],
+                             result["response"])
+
+    @staticmethod
+    def response_to_turn_response(result) -> TurnResponse:
+        if result["result_code"] == 0:
+            return TurnResponse(0, 0)
+        else:
+            TurnResponse(result["result_code"], result["response_length"],
+                         result["response"])
+
+    @staticmethod
+    def response_to_move_response(result) -> MoveResponse:
+        if result["result_code"] == 0:
+            return MoveResponse(0, 0)
+        else:
+            MoveResponse(result["result_code"], result["response_length"],
+                         result["response"])
+
 
 def message_to_server(sock, action, json_mode=True, **kwargs):
     '''

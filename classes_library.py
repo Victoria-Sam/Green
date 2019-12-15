@@ -221,3 +221,18 @@ class Map10Response(Response):
 @dataclass
 class GamesResponce(Response):
     games: List[Game]
+
+
+@dataclass
+class UpgradeResponse(Response):
+    error = None
+
+
+@dataclass
+class TurnResponse(Response):
+    error = None
+
+
+@dataclass
+class MoveResponse(Response):
+    error = None
