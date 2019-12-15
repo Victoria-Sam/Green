@@ -40,9 +40,20 @@ class RefugeesArrivalEvent(Event):
 
 
 @dataclass
+class ResourceOverflowEvent(Event):
+    product: int = None
+    armor: int = None
+
+
+@dataclass
 class ResourceLackEvent(Event):
     product: int = None
     armor: int = None
+
+
+@dataclass
+class GameOverEvent(Event):
+    pass
 
 
 @dataclass

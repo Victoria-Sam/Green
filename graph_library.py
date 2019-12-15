@@ -1,10 +1,11 @@
 from PyQt5.QtCore import QSize, Qt, QLineF, QRectF, QMarginsF
-from PyQt5.QtGui import (QBrush, QPainter,
+from PyQt5.QtGui import (QBrush, QPainter, QFont,
                          QPen, QColor, QTransform, QPixmap)
 from PyQt5.QtWidgets import (QApplication, QFrame, QGraphicsView,
                              QGraphicsEllipseItem, QGraphicsDropShadowEffect,
                              QGraphicsItem, QGraphicsLineItem,
-                             QGraphicsPixmapItem)
+                             QGraphicsTextItem, QGraphicsPixmapItem,
+                             QGraphicsSimpleTextItem)
 
 colors = {0: QColor('#dbdbdb'),
           1: QColor('#ad3636'),
@@ -13,7 +14,10 @@ colors = {0: QColor('#dbdbdb'),
 icon_address = {1: 'icons/town.png',
                 2: 'icons/market.png',
                 3: 'icons/storage.png',
-                4: 'icons/train.png'}
+                4: 'icons/train.png',
+                5: 'icons/population.png',
+                6: 'icons/product.png',
+                7: 'icons/armor.png'}
 
 
 class QTrain(QGraphicsEllipseItem):
@@ -36,6 +40,7 @@ class BestNode(QGraphicsEllipseItem):
     def __init__(self, number, *args, **kwargs):
         super(BestNode, self).__init__(*args, **kwargs)
         self.number = number
+        self.type = None
         self.lines = []
         self.icon = None
         self.population_icon = None
@@ -142,6 +147,92 @@ class RenderArea(QGraphicsView):
                 pixmap.setZValue(3)
                 best_node.icon = pixmap
                 self.scene().addItem(pixmap)
+                current_post = [x for x in game.posts if
+                                x.point_id == best_node.number]
+                x_ppl_offset = 5
+                x_offset = 0
+                y_ppl_offset = 8
+                y_offset = 5
+                if post_type == 1:
+                    pixmap_ppl = QPixmap(icon_address[5])
+                    pixmap_ppl = QGraphicsPixmapItem(pixmap_ppl.scaled(50, 30))
+                    pixmap_ppl.setPos(node_pos[0] - 8, node_pos[1] - 8 + 50)
+                    pixmap_ppl.setZValue(6)
+                    best_node.population_icon = pixmap_ppl
+                    best_node.type = 1
+                    self.scene().addItem(pixmap_ppl)
+
+                    ppl_text = QGraphicsTextItem()
+                    ppl_text.setHtml(
+                        str("<div style='background-color: #000000;" +
+                            "color: #ffffff'>") +
+                        str(current_post[0].population) + "/" +
+                        str(current_post[0].population_capacity) +
+                        str("</div>"))
+                    ppl_text.setFont(QFont("Times", 10, 100, 0))
+                    ppl_text.setZValue(7)
+                    ppl_text.setPos(pixmap_ppl.x() + x_ppl_offset,
+                                    pixmap_ppl.y() + y_ppl_offset)
+                    self.scene().addItem(ppl_text)
+                    best_node.population_text = ppl_text
+
+                if post_type == 1 or post_type == 2:
+                    pixmap_prod = QPixmap(icon_address[6])
+                    pixmap_prod = QGraphicsPixmapItem(
+                        pixmap_prod.scaled(50, 30))
+                    if post_type == 1:
+                        pixmap_prod.setPos(
+                            node_pos[0] - 8, node_pos[1] - 8 + 80)
+                    else:
+                        pixmap_prod.setPos(
+                            node_pos[0] - 8, node_pos[1] - 8 + 50)
+                        best_node.type = 2
+                    pixmap_prod.setZValue(6)
+                    best_node.product_icon = pixmap_prod
+                    self.scene().addItem(pixmap_prod)
+
+                    prod_text = QGraphicsTextItem()
+                    prod_text.setHtml(
+                        str("<div style='background-color: #000000;" +
+                            " color: #ffffff'>") +
+                        str(current_post[0].product) + "/" +
+                        str(current_post[0].product_capacity) + str("</div>"))
+
+                    prod_text.setFont(QFont("Times", 9, 200, 0))
+                    prod_text.setZValue(7)
+                    prod_text.setPos(pixmap_prod.x() + x_offset,
+                                     pixmap_prod.y() + y_offset)
+                    self.scene().addItem(prod_text)
+                    best_node.product_text = prod_text
+
+                if post_type == 1 or post_type == 3:
+                    pixmap_armor = QPixmap(icon_address[7])
+                    pixmap_armor = QGraphicsPixmapItem(
+                        pixmap_armor.scaled(50, 30))
+                    if post_type == 1:
+                        pixmap_armor.setPos(
+                            node_pos[0] - 8, node_pos[1] - 8 + 110)
+                    else:
+                        pixmap_armor.setPos(
+                            node_pos[0] - 8, node_pos[1] - 8 + 50)
+                        best_node.type = 3
+                    pixmap_armor.setZValue(6)
+                    best_node.armor_icon = pixmap_armor
+                    self.scene().addItem(pixmap_armor)
+
+                    armor_text = QGraphicsTextItem()
+                    armor_text.setHtml(
+                        str("<div style='background-color: #000000;" +
+                            " color: #ffffff'>") +
+                        str(current_post[0].armor) + "/" +
+                        str(current_post[0].armor_capacity) + str("</div>"))
+                    armor_text.setFont(QFont("Times", 9, 200, 0))
+                    armor_text.setZValue(7)
+                    armor_text.setPos(pixmap_armor.x() + x_offset,
+                                      pixmap_armor.y() + y_offset)
+                    self.scene().addItem(armor_text)
+                    best_node.armor_text = armor_text
+
             self.scene().addItem(best_node)
 
         for parent_nodes, info in edge_labels.items():
@@ -195,9 +286,9 @@ class RenderArea(QGraphicsView):
                 train_pixmap.scaled(train_size, train_size))
             train_pixmap.setPos(train_coords[0] - train_size/2,
                                 train_coords[1] - train_size/2,)
-            train_pixmap.setZValue(11)
+            train_pixmap.setZValue(5)
             train_visual.icon = train_pixmap
-            train_visual.setZValue(10)
+            train_visual.setZValue(4)
             pen = QPen(QColor("red"))
             pen.setWidth(1)
             if train.player_id == game.player_id:
@@ -218,6 +309,33 @@ class RenderArea(QGraphicsView):
                                  QTrain, self.scene().items()))
         lines = list(filter(lambda scene_item: type(scene_item) ==
                             BestLine, self.scene().items()))
+        all_nodes = list(filter(lambda scene_item: type(scene_item) ==
+                         BestNode, self.scene().items()))
+        post_nodes = [x for x in all_nodes if x.type is not None]
+        for post_node in post_nodes:
+            current_post = [x for x in game.posts if
+                            x.point_id == post_node.number]
+            if post_node.type == 1:
+                post_node.population_text.setHtml(
+                        str("<div style='background-color: #000000;" +
+                            " color: #ffffff'>") +
+                        str(current_post[0].population) + "/" +
+                        str(current_post[0].population_capacity) +
+                        str("</div>"))
+
+            if post_node.type == 1 or post_node.type == 2:
+                post_node.product_text.setHtml(
+                        str("<div style='background-color: #000000;" +
+                            " color: #ffffff'>") +
+                        str(current_post[0].product) + "/" +
+                        str(current_post[0].product_capacity) + str("</div>"))
+
+            if post_node.type == 1 or post_node.type == 3:
+                post_node.armor_text.setHtml(
+                        str("<div style='background-color: #000000;" +
+                            " color: #ffffff'>") +
+                        str(current_post[0].armor) + "/" +
+                        str(current_post[0].armor_capacity) + str("</div>"))
         train_size = 20
         offset = 6
         for train in game.trains:

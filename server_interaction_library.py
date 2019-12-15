@@ -16,7 +16,9 @@ event_classes = {
     2: HijackersAssaultEvent,
     3: ParasitesAssaultEvent,
     4: RefugeesArrivalEvent,
-    6: ResourceLackEvent
+    5: ResourceOverflowEvent,
+    6: ResourceLackEvent,
+    100: GameOverEvent
 }
 
 
@@ -82,13 +84,13 @@ class ResponseParser:
                     else:
                         temp_event_param = value
                         if key == "product":
-                            type_6_product = True
-                            type_6_armor = False
+                            type_5_6_product = True
+                            type_5_6_armor = False
                         elif key == "armor":
-                            type_6_product = False
-                            type_6_armor = True
-                if temp_type == 6:
-                    if type_6_product is True:
+                            type_5_6_product = False
+                            type_5_6_armor = True
+                if temp_type == 6 or temp_type == 5:
+                    if type_5_6_product is True:
                         temp_event = event_classes[event["type"]](
                             temp_type, temp_tick, temp_event_param, None
                         )
