@@ -130,7 +130,6 @@ class BotBrains(QRunnable):
             for temp_point in line.points:
                 if temp_point.post_id is not None:
                     temp_point.point_type = post_types[temp_point.idx]
-            print(line)
         edge_labels = {
             (edge[0], edge[1]):
                 [edge[2]['length'], edge[2]['idx']] for edge in list(
