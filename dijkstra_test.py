@@ -7,13 +7,13 @@ class MyTestCase(unittest.TestCase):
 
     def setUp(self):
         self.points = points = [
-            Point(idx=0, post_id=1),
-            Point(idx=1, post_id=0),
-            Point(idx=2, post_id=2),
-            Point(idx=3, post_id=2),
-            Point(idx=4, post_id=3),
-            Point(idx=5, post_id=0),
-            Point(idx=6, post_id=0)
+            Point(idx=0, post_id=0, point_type=1),
+            Point(idx=1, post_id=0, point_type=None),
+            Point(idx=2, post_id=0, point_type=2),
+            Point(idx=3, post_id=0, point_type=2),
+            Point(idx=4, post_id=0, point_type=3),
+            Point(idx=5, post_id=0, point_type=None),
+            Point(idx=6, post_id=0, point_type=None)
         ]
 
         edges = [
@@ -33,14 +33,14 @@ class MyTestCase(unittest.TestCase):
         self.graph = Graph(points, edges)
 
     def test_dijkstra1(self):
-        result = the_best_way(self.graph, Point(0, 1))
+        result = the_best_way(self.graph, Point(0, 0, 1))
         self.assertEqual(result[2][0].idx, 3)
         self.assertEqual(result[2][1].idx, 10)
         self.assertEqual(result[2][2].idx, 11)
         self.assertEqual(result[2][-1], 14)
 
     def test_dijkstra2(self):
-        result = the_best_way(self.graph, Point(3, 2))
+        result = the_best_way(self.graph, Point(3, 0, 2))
         self.assertEqual(result[4][0].idx, 12)
         self.assertEqual(result[4][1].idx, 11)
         self.assertEqual(result[4][2].idx, 10)
