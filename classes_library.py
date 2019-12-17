@@ -60,6 +60,7 @@ class GameOverEvent(Event):
 class Point:
     idx: int
     post_id: int
+    point_type: int = None
 
 
 @dataclass
@@ -225,14 +226,14 @@ class GamesResponce(Response):
 
 @dataclass
 class UpgradeResponse(Response):
-    error = None
+    error: str = None
 
 
 @dataclass
 class TurnResponse(Response):
-    error = None
+    error: str = None
 
 
 @dataclass
 class MoveResponse(Response):
-    error = None
+    error: str = None
