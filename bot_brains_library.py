@@ -123,15 +123,14 @@ class BotBrains(QRunnable):
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
-        for post in self.game.posts:
-            current_point = [x for x in self.game.map.graph.points
-                             if x.idx == post.point_id]
-            current_point[0].point_type = post.post_type
+        for current_point in self.game.map.graph.points:
+            if current_point.post_id is not None:
+                current_point.point_type = post_types[current_point.idx]
         for line in self.game.map.graph.lines:
             for temp_point in line.points:
-                current_temp_point = [x for x in self.game.map.graph.points
-                                      if x.idx == temp_point.idx]
-                temp_point.point_type = current_temp_point[0].point_type
+                if temp_point.post_id is not None:
+                    temp_point.point_type = post_types[temp_point.idx]
+            print(line)
         edge_labels = {
             (edge[0], edge[1]):
                 [edge[2]['length'], edge[2]['idx']] for edge in list(
