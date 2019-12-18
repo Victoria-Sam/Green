@@ -88,7 +88,10 @@ class BotBrains(QRunnable):
         '''
         Пока что while True, потом до ивента с концом игры
         '''
-        self.get_best_ways(the_best_way(self.game.map.graph, get_point(self.game.map.graph, self.game.home.idx)))
+        self.get_best_ways(the_best_way(
+            self.game.map.graph,
+            get_point(self.game.map.graph, self.game.home.idx))
+        )
         while True:
             self.update_map1()
             self.find_trains_way()
@@ -99,7 +102,6 @@ class BotBrains(QRunnable):
             if x.point_id == idx:
                 return x
 
-    
     def init_bot(self):
         '''
         Логинимся и рисуем начальную карту (0 слой)
@@ -109,17 +111,16 @@ class BotBrains(QRunnable):
         self.game.player_id = login_response.player_id
         self.nx_graph = nx.Graph()
         self.draw_map0()
-    
 
     def get_best_ways(self, best_way):
-        self.best_ways_markets={}
-        self.best_ways_storages={}
+        self.best_ways_markets = {}
+        self.best_ways_storages = {}
         for key, val in best_way.items():
-            if val[-2].points[1].point_type==2 or val[-2].points[0].point_type==2:
+            if val[-2].points[1].point_type == 2 or \
+               val[-2].points[0].point_type == 2:
                 self.best_ways_markets[key] = val
             else:
                 self.best_ways_storages[key] = val
-
 
     def draw_map0(self):
         '''
@@ -163,6 +164,10 @@ class BotBrains(QRunnable):
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
+            temp_hometown = [twn for twn in self.game.posts if
+                             twn.post_type == 1 and
+                             self.game.home.post_idx == twn.idx]
+            self.game.home.town = temp_hometown[0]
         self.signals.update_map1.emit(self.game)
 
     def move_trains(self, line_idx, speed, train_idx):
@@ -191,10 +196,12 @@ class BotBrains(QRunnable):
         best_way_storage = None
         best_storage = None
         for key, val in self.best_ways_storages.items():
-            if not best_way_storage or best_way_storage[-1]>val[-1]:
+            if not best_way_storage or best_way_storage[-1] > val[-1]:
                 best_way_storage = val
                 best_storage = key
-        best_market, best_way = self.choose_way(best_storage,best_way_storage, train)
+        best_market, best_way = self.choose_way(best_storage,
+                                                best_way_storage,
+                                                train)
         best_way = best_way[0:-1]
         print(best_market)
         if best_way:
@@ -215,20 +222,23 @@ class BotBrains(QRunnable):
                     best_market = market
                 if self.isEnough(best_way_storage, market, val, train):
                     return (best_storage, best_way_storage)
-                if min(best_market.product, train.goods_capacity) - 2*best_way_market[-1] < min(market.product, train.goods_capacity) - 2*val[-1]:
+                if min(best_market.product, train.goods_capacity) -\
+                    2*best_way_market[-1] <\
+                        min(market.product, train.goods_capacity) - 2*val[-1]:
                     best_market = market
                     best_way_market = val
-        self.potencial_product[train.train_id] = min(best_market.product, train.goods_capacity)
+        self.potencial_product[train.train_id] = min(best_market.product,
+                                                     train.goods_capacity)
         return (best_market, best_way_market)
-
 
     def isEnough(self, best_way_storage, market, way_market, train):
         potencial = sum(self.potencial_product.values())
         print(self.game.home.town.product + potencial)
-        flag1 = (self.game.home.town.product + potencial)/self.game.home.town.population > 2*best_way_storage[-1] + 2 * way_market[-1]
+        flag1 = (self.game.home.town.product + potencial) /\
+            self.game.home.town.population >\
+            2*best_way_storage[-1] + 2 * way_market[-1]
         flag2 = min(market.product, train.goods_capacity) > 2*way_market[-1]
-        return  flag1 and flag2
-
+        return flag1 and flag2
 
     def find_trains_way(self):
         for train in self.game.trains:
