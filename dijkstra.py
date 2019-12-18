@@ -72,7 +72,7 @@ def the_best_way(graph, start_point):
     dict_of_shortest_ways = {}
     post_type = [1, 2, 3]
     for point in graph.points:
-        if point != start_point and point.post_id in post_type:
+        if point != start_point and point.point_type in post_type:
             end_point = point
             idx_dist = graph.points.index(point)
             distance = list_of_dist[idx_dist]
@@ -87,5 +87,4 @@ def the_best_way(graph, start_point):
             shortest_way = shortest_way[::-1]
             shortest_way.append(distance)
             dict_of_shortest_ways[point.idx] = shortest_way
-
     return dict_of_shortest_ways
