@@ -95,6 +95,7 @@ class BotBrains(QRunnable):
         while True:
             self.update_map1()
             self.find_trains_way()
+            time.sleep(3)
             self.turn()
 
     def get_city(self, idx):
@@ -182,6 +183,7 @@ class BotBrains(QRunnable):
         line = self.current_ways[train.train_id].pop(0)
         if isinstance(line, list):
             line = line[0]
+        #print(line)
         train_line = get_line(self.game.map.graph, train.line_id)
         train_point = train_line.points[0 if train.position == 0 else 1]
         if get_line(self.game.map.graph, line.idx).points[0].idx == \
@@ -203,11 +205,12 @@ class BotBrains(QRunnable):
                                                 best_way_storage,
                                                 train)
         best_way = best_way[0:-1]
-        print(best_market)
+        print(best_way)
         if best_way:
             self.market_train[best_market] = train.train_id
             self.current_ways[train.train_id] = best_way
-            self.current_ways[train.train_id].append(best_way[::-1])
+            self.current_ways[train.train_id]+=best_way[::-1]
+            print(self.current_ways[train.train_id])
             self.current_ways[train.train_id].append(best_market)
             self.next_line(train)
 
@@ -229,11 +232,10 @@ class BotBrains(QRunnable):
                     best_way_market = val
         self.potencial_product[train.train_id] = min(best_market.product,
                                                      train.goods_capacity)
-        return (best_market, best_way_market)
+        return (best_market.point_id, best_way_market)
 
     def isEnough(self, best_way_storage, market, way_market, train):
         potencial = sum(self.potencial_product.values())
-        print(self.game.home.town.product + potencial)
         flag1 = (self.game.home.town.product + potencial) /\
             self.game.home.town.population >\
             2*best_way_storage[-1] + 2 * way_market[-1]
