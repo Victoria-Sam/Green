@@ -36,7 +36,7 @@ class PriorityQueue:
         raise KeyError('pop from an empty priority queue')
 
 
-def the_best_way(graph, start_point):
+def dijkstra(graph, start_point, forbidden_type=0):
     list_of_dist = [float('inf')] * len(graph.points)
     list_of_edge_to = [None] * len(graph.points)
     list_of_marks = [False] * len(graph.points)
@@ -45,13 +45,14 @@ def the_best_way(graph, start_point):
 
     for index_of_point, point in enumerate(graph.points):
         priority.add_point(index_of_point, float('inf'))
-        adjacency_list.append([])
+        adjacency_list.append([])  # список смежностей
 
     for line in graph.lines:
         index_a = graph.points.index(line.points[0])
         adjacency_list[index_a].append(line)
         index_b = graph.points.index(line.points[1])
         adjacency_list[index_b].append(line)
+
     index_of_start = graph.points.index(start_point)
     priority.add_point(index_of_start, 0)
     list_of_dist[index_of_start] = 0
@@ -59,8 +60,10 @@ def the_best_way(graph, start_point):
     while False in list_of_marks:
         index_of_start = priority.pop_point()
         list_of_marks[index_of_start] = True
+        start = graph.points[index_of_start]
+        if start.point_type == forbidden_type:
+            continue
         for edge in adjacency_list[index_of_start]:
-            start = graph.points[index_of_start]
             index_of_neighbour = graph.points.index(
                 edge.points[0 if edge.points[1] == start else 1])
             new_path_length = edge.length + list_of_dist[index_of_start]
@@ -71,6 +74,9 @@ def the_best_way(graph, start_point):
 
     dict_of_shortest_ways = {}
     post_type = [1, 2, 3]
+    if forbidden_type != 0:
+        post_type.remove(forbidden_type)
+        post_type.remove(1)
     for point in graph.points:
         if point != start_point and point.point_type in post_type:
             end_point = point
@@ -89,3 +95,15 @@ def the_best_way(graph, start_point):
             dict_of_shortest_ways[point.idx] = shortest_way
 
     return dict_of_shortest_ways
+
+
+def the_best_way(graph, start_point):
+    """Builder, which make all shortest ways for destinations."""
+    for_market = dijkstra(graph, start_point, 3)
+    for_storage = dijkstra(graph, start_point, 2)
+    home = dijkstra(graph, start_point)
+    ways = {}
+    ways.update(for_market)
+    ways.update(for_storage)
+    ways.update(home)
+    return ways
