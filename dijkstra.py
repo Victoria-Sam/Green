@@ -36,6 +36,7 @@ class PriorityQueue:
         raise KeyError('pop from an empty priority queue')
 
 
+
 def dijkstra(graph, start_point, forbidden_type=0):
     list_of_dist = [float('inf')] * len(graph.points)
     list_of_edge_to = [None] * len(graph.points)
@@ -77,6 +78,7 @@ def dijkstra(graph, start_point, forbidden_type=0):
     if forbidden_type != 0:
         post_type.remove(forbidden_type)
         post_type.remove(1)
+
     for point in graph.points:
         if point != start_point and point.point_type in post_type:
             end_point = point
@@ -107,3 +109,4 @@ def the_best_way(graph, start_point):
     ways.update(for_storage)
     ways.update(home)
     return ways
+

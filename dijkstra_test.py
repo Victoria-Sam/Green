@@ -1,4 +1,5 @@
 import unittest
+
 from dijkstra import dijkstra, the_best_way
 from classes_library import Line, Point, Graph
 
