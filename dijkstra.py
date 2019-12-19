@@ -36,7 +36,6 @@ class PriorityQueue:
         raise KeyError('pop from an empty priority queue')
 
 
-
 def dijkstra(graph, start_point, forbidden_type=0):
     list_of_dist = [float('inf')] * len(graph.points)
     list_of_edge_to = [None] * len(graph.points)
@@ -46,7 +45,7 @@ def dijkstra(graph, start_point, forbidden_type=0):
 
     for index_of_point, point in enumerate(graph.points):
         priority.add_point(index_of_point, float('inf'))
-        adjacency_list.append([])  # список смежностей
+        adjacency_list.append([])
 
     for line in graph.lines:
         index_a = graph.points.index(line.points[0])
@@ -101,12 +100,19 @@ def dijkstra(graph, start_point, forbidden_type=0):
 
 def the_best_way(graph, start_point):
     """Builder, which make all shortest ways for destinations."""
-    for_market = dijkstra(graph, start_point, 3)
-    for_storage = dijkstra(graph, start_point, 2)
+    for_market = {}
+    for_storage = {}
+    if start_point.point_type == 2:
+        for_market = dijkstra(graph, start_point, 3)
+    elif start_point.point_type == 3:
+        for_storage = dijkstra(graph, start_point, 2)
+    else:
+        for_market = dijkstra(graph, start_point, 3)
+        for_storage = dijkstra(graph, start_point, 2)
     home = dijkstra(graph, start_point)
     ways = {}
+    ways.update(home)
     ways.update(for_market)
     ways.update(for_storage)
-    ways.update(home)
     return ways
 
