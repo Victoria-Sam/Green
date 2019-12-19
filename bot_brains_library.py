@@ -68,7 +68,7 @@ class BotBrains(QRunnable):
         Initialise the runner function
         '''
         try:
-            result = self.main_loop
+            result = self.main_loop()
         except Exception:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
@@ -205,12 +205,10 @@ class BotBrains(QRunnable):
                                                 best_way_storage,
                                                 train)
         best_way = best_way[0:-1]
-        print(best_way)
         if best_way:
             self.market_train[best_market] = train.train_id
             self.current_ways[train.train_id] = best_way
             self.current_ways[train.train_id]+=best_way[::-1]
-            print(self.current_ways[train.train_id])
             self.current_ways[train.train_id].append(best_market)
             self.next_line(train)
 
