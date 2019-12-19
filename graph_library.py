@@ -242,7 +242,6 @@ class RenderArea(QGraphicsView):
                                  parent_nodes[0], best_nodes))[0]
             node_parent_2 = list(filter(lambda best_node: best_node.number ==
                                  parent_nodes[1], best_nodes))[0]
-
             best_line = BestLine(
                 node_parent_1, node_parent_2, info[0], info[1],
                 QLineF(node_parent_1.boundingRect().center(),

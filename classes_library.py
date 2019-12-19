@@ -53,7 +53,7 @@ class ResourceLackEvent(Event):
 
 @dataclass
 class GameOverEvent(Event):
-    pass
+    population: int = None
 
 
 @dataclass
