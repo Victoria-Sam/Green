@@ -68,7 +68,7 @@ class BotBrains(QRunnable):
         Initialise the runner function
         '''
         try:
-            result = self.main_loop()
+            result = self.main_loop
         except Exception:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
