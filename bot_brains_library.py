@@ -85,6 +85,7 @@ class BotBrains(QRunnable):
         '''
         self.init_bot()
         self.potencial_product = {}
+        self.game_end = False
         '''
         Пока что while True, потом до ивента с концом игры
         '''
@@ -92,16 +93,14 @@ class BotBrains(QRunnable):
             self.game.map.graph,
             get_point(self.game.map.graph, self.game.home.idx))
         )
-        while True:
+        while not self.game_end:
             self.update_map1()
             self.find_trains_way()
             # time.sleep(0.5)
             self.turn()
 
     def get_city(self, idx):
-        for x in self.game.posts:
-            if x.point_id == idx:
-                return x
+        return self.game.posts[idx]
 
     def init_bot(self):
         '''
@@ -131,19 +130,20 @@ class BotBrains(QRunnable):
         if map_0_response.result_code == 0:
             self.game.map = map_0_response.graph_map
         self.game.nx_graph = nx.Graph()
-        for point in self.game.map.graph.points:
+        for point in self.game.map.graph.points.values():
             self.game.nx_graph.add_node(point.idx)
-        for line in self.game.map.graph.lines:
-            self.game.nx_graph.add_edge(line.points[0].idx, line.points[1].idx,
+        for line in self.game.map.graph.lines.values():
+            self.game.nx_graph.add_edge(line.points[0].idx,
+                                        line.points[1].idx,
                                         length=line.length, idx=line.idx)
         map_1_response, post_types = self.game.connection.map1()
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
-        for current_point in self.game.map.graph.points:
+        for current_point in self.game.map.graph.points.values():
             if current_point.post_id is not None:
                 current_point.point_type = post_types[current_point.idx]
-        for line in self.game.map.graph.lines:
+        for line in self.game.map.graph.lines.values():
             for temp_point in line.points:
                 if temp_point.post_id is not None:
                     temp_point.point_type = post_types[temp_point.idx]
@@ -163,15 +163,14 @@ class BotBrains(QRunnable):
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
-            temp_hometown = [twn for twn in self.game.posts if
-                             twn.post_type == 1 and
-                             self.game.home.post_idx == twn.idx]
-            self.game.home.town = temp_hometown[0]
-            if map_1_response.trains[0].next_level_price is not None:
-                if self.game.home.town.armor >=\
-                        map_1_response.trains[0].next_level_price:
-                    self.game.connection.upgrade(
-                        [], [map_1_response.trains[0].train_id])
+            self.game.home.town = self.game.posts[self.game.home.post_idx]
+
+            # !!! Тут должны быть апгрейды(вроде как)
+            # if map_1_response.trains[0].next_level_price is not None:
+            #     if self.game.home.town.armor >=\
+            #             map_1_response.trains[0].next_level_price:
+            #         self.game.connection.upgrade(
+            #             [], [map_1_response.trains[0].train_id])
         self.signals.update_map1.emit(self.game)
 
     def move_trains(self, line_idx, speed, train_idx):

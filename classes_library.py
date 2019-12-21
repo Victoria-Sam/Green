@@ -72,20 +72,16 @@ class Line:
 
 @dataclass
 class Graph:
-    points: List[Point]
-    lines: List[Line]
+    points: Dict[int, Point]
+    lines: Dict[int, Line]
 
 
 def get_point(graph, idx):
-    for x in graph.points:
-        if x.idx == idx:
-            return x
+    return graph.points[idx]
 
 
 def get_line(graph, idx):
-    for x in graph.lines:
-        if x.idx == idx:
-            return x
+    return graph.lines[idx]
 
 
 @dataclass
@@ -196,7 +192,7 @@ class PlayerResponse(Response):
     name: str
     rating: int
     town: Town
-    trains: List[Train]
+    trains: Dict[int, Train]
 
 
 @dataclass
@@ -207,21 +203,21 @@ class Map0Response(Response):
 @dataclass
 class Map1Response(Response):
     idx: int
-    posts: List[Post]
+    posts: Dict[int, Post]
     ratings: Dict[str, Rating]
-    trains: List[Train]
+    trains: Dict[int, Train]
 
 
 @dataclass
 class Map10Response(Response):
     idx: int
-    coordinates: List[PointWithCoordinates]
+    coordinates: Dict[int, PointWithCoordinates]
     size: List[int]
 
 
 @dataclass
 class GamesResponce(Response):
-    games: List[Game]
+    games: Dict[str, Game]
 
 
 @dataclass

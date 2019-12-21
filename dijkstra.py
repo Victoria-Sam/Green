@@ -115,4 +115,3 @@ def the_best_way(graph, start_point):
     ways.update(for_market)
     ways.update(for_storage)
     return ways
-

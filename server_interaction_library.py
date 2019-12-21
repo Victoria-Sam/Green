@@ -6,11 +6,12 @@ from classes_library import *
 #     Map1Response, PlayerResponse, Map, Point, Line, Graph, Town, Market,\
 #     Storage, Rating, Train, Home, Event, TrainCollisionEvent
 
-from typing import List
+from typing import List, Dict
 
 action_types = {'LOGIN': 1, 'LOGOUT': 2, 'MOVE': 3, 'UPGRADE': 4, 'TURN': 5,
                 'PLAYER': 6, 'GAMES': 7, 'MAP': 10}
 post_types = {1: 'town', 2: 'market', 3: 'storage'}
+
 event_classes = {
     1: TrainCollisionEvent,
     2: HijackersAssaultEvent,
@@ -37,20 +38,15 @@ class ResponseParser:
         custom class Map0Response
         '''
         resp = result["response"]
-        temp_points = list()
-        points_dict = {}
+        temp_points = {}
         for point in resp["points"]:
-            temp_points.append(Point(point["idx"], point["post_idx"]))
-            points_dict[point["idx"]] = point["post_idx"]
-        temp_lines = list()
+            temp_points[point["idx"]] = Point(point["idx"], point["post_idx"])
+        temp_lines = {}
         for line in resp["lines"]:
-            point_0_id = line["points"][0]
-            point_1_id = line["points"][1]
-            temp_vertex_0 = Point(point_0_id, points_dict[point_0_id])
-            temp_vertex_1 = Point(point_1_id, points_dict[point_1_id])
-            temp_vertexes = [temp_vertex_0, temp_vertex_1]
-            temp_line = Line(line["idx"], line["length"], temp_vertexes)
-            temp_lines.append(temp_line)
+            temp_vertexes = [temp_points[line["points"][0]],
+                             temp_points[line["points"][1]]]
+            temp_lines[line["idx"]] = Line(line["idx"], line["length"],
+                                           temp_vertexes)
         temp_graph = Graph(temp_points, temp_lines)
         temp_map = Map(resp["idx"], resp["name"], temp_graph)
         return Map0Response(result["result_code"], result["response_length"],
@@ -68,9 +64,9 @@ class ResponseParser:
         all_ratings = resp["ratings"]
         all_trains = resp["trains"]
 
-        posts = list()
-        ratings = dict()
-        trains = list()
+        posts = {}
+        ratings = {}
+        trains = {}
 
         for post in all_posts:  # post = 1 dict from list
             events = list()
@@ -122,7 +118,7 @@ class ResponseParser:
                     post["product_capacity"],
                     # post["train_cooldown"]
                 )
-                posts.append(temp_town)
+                posts[post["point_idx"]] = temp_town
             elif post["type"] == 2:
                 temp_posts_types[post["point_idx"]] = 2
                 temp_market = Market(
@@ -135,7 +131,7 @@ class ResponseParser:
                     post["product_capacity"],
                     post["replenishment"]
                 )
-                posts.append(temp_market)
+                posts[post["point_idx"]] = temp_market
             elif post["type"] == 3:
                 temp_posts_types[post["point_idx"]] = 3
                 temp_storage = Storage(
@@ -148,7 +144,7 @@ class ResponseParser:
                     post["armor_capacity"],
                     post["replenishment"]
                 )
-                posts.append(temp_storage)
+                posts[post["point_idx"]] = temp_storage
 
         for rating in all_ratings.values():
             ratings[rating["idx"]] = Rating(rating["idx"], rating["name"],
@@ -173,7 +169,7 @@ class ResponseParser:
                     train["position"],
                     train["speed"]
             )
-            trains.append(temp_train)
+            trains[train["idx"]] = temp_train
         return Map1Response(result["result_code"], result["response_length"],
                             resp["idx"], posts, ratings, trains),\
             temp_posts_types
@@ -223,7 +219,7 @@ class ResponseParser:
             resp["home"]["idx"], resp["home"]["post_idx"], temp_town
         )
 
-        trains = list()
+        trains = {}
         for train in resp["trains"]:
             # temp_events = list()
             # for event in train["events"]:
@@ -243,7 +239,7 @@ class ResponseParser:
                     train["position"],
                     train["speed"]
             )
-            trains.append(temp_train)
+            trains[train["idx"]] = temp_train
 
         player_response = PlayerResponse(
             result["result_code"],
