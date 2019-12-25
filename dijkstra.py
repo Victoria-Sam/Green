@@ -36,79 +36,72 @@ class PriorityQueue:
         raise KeyError('pop from an empty priority queue')
 
 
-def dijkstra(graph, start_point, forbidden_type=0):
-    list_of_dist = [float('inf')] * len(graph.points)
-    list_of_edge_to = [None] * len(graph.points)
-    list_of_marks = [False] * len(graph.points)
-    adjacency_list = []
+def dijkstra(graph, start_point, forbidden_type=0):  # index os start point in dictionary graph.points
+    dict_of_dist = {key: float('inf') for (key, value) in graph.points.items()}
+    dict_of_edge_to = {key: None for (key, value) in graph.points.items()}
+    dict_of_marks = {key: False for (key, value) in graph.points.items()}
+    adjacency_list = {key: [] for (key, value) in graph.points.items()}
     priority = PriorityQueue()
 
-    for index_of_point, point in enumerate(graph.points):
+    for index_of_point in graph.points.keys():
         priority.add_point(index_of_point, float('inf'))
-        adjacency_list.append([])
 
-    for line in graph.lines:
-        index_a = graph.points.index(line.points[0])
+    for line in graph.lines.values():  # creating of adjacency_list, format: {point_idx:[Line1, Line2]}
+        index_a = line.points[0].idx
         adjacency_list[index_a].append(line)
-        index_b = graph.points.index(line.points[1])
+        index_b = line.points[1].idx
         adjacency_list[index_b].append(line)
 
-    index_of_start = graph.points.index(start_point)
+    index_of_start = start_point
     priority.add_point(index_of_start, 0)
-    list_of_dist[index_of_start] = 0
+    dict_of_dist[index_of_start] = 0
 
-    while False in list_of_marks:
+    while False in dict_of_marks.values():  # dijkstra
         index_of_start = priority.pop_point()
-        list_of_marks[index_of_start] = True
-        start = graph.points[index_of_start]
-        if start.point_type == forbidden_type:
+        dict_of_marks[index_of_start] = True
+        start = index_of_start
+        if graph.points[start].point_type == forbidden_type:
             continue
         for edge in adjacency_list[index_of_start]:
-            index_of_neighbour = graph.points.index(
-                edge.points[0 if edge.points[1] == start else 1])
-            new_path_length = edge.length + list_of_dist[index_of_start]
-            if new_path_length < list_of_dist[index_of_neighbour]:
-                list_of_edge_to[index_of_neighbour] = edge
-                list_of_dist[index_of_neighbour] = new_path_length
+            index_of_neighbour = edge.points[0 if edge.points[1].idx == start else 1].idx
+            new_path_length = edge.length + dict_of_dist[index_of_start]
+            if new_path_length < dict_of_dist[index_of_neighbour]:
+                dict_of_edge_to[index_of_neighbour] = edge
+                dict_of_dist[index_of_neighbour] = new_path_length
                 priority.add_point(index_of_neighbour, new_path_length)
 
-    dict_of_shortest_ways = {}
+    dict_of_shortest_ways = {}  # result
     post_type = [1, 2, 3]
-    if forbidden_type != 0:
+    if forbidden_type != 0:  # type exclusion
         post_type.remove(forbidden_type)
         post_type.remove(1)
 
-    for point in graph.points:
-        if point != start_point and point.point_type in post_type:
-            end_point = point
-            idx_dist = graph.points.index(point)
-            distance = list_of_dist[idx_dist]
+    for point_idx, point in graph.points.items():  # creating of result
+        if point_idx != start_point and point.point_type in post_type:
+            # if there is no path.
+            if dict_of_edge_to[point_idx] is None:
+                continue
+            end_point = point_idx
+            distance = dict_of_dist[end_point]
             shortest_way = []
+
             while end_point != start_point:
-                idx_end_point = graph.points.index(end_point)
-                part_of_the_way = list_of_edge_to[idx_end_point]
+                part_of_the_way = dict_of_edge_to[end_point]
                 shortest_way.append(part_of_the_way)
                 intermediate_point = part_of_the_way.points[
-                    0 if part_of_the_way.points[1] == end_point else 1]
+                    0 if part_of_the_way.points[1].idx == end_point else 1].idx
                 end_point = intermediate_point
             shortest_way = shortest_way[::-1]
             shortest_way.append(distance)
-            dict_of_shortest_ways[point.idx] = shortest_way
+            dict_of_shortest_ways[point_idx] = shortest_way
 
     return dict_of_shortest_ways
 
 
 def the_best_way(graph, start_point):
     """Builder, which make all shortest ways for destinations."""
-    for_market = {}
-    for_storage = {}
-    if start_point.point_type == 2:
-        for_market = dijkstra(graph, start_point, 3)
-    elif start_point.point_type == 3:
-        for_storage = dijkstra(graph, start_point, 2)
-    else:
-        for_market = dijkstra(graph, start_point, 3)
-        for_storage = dijkstra(graph, start_point, 2)
+    for_market = dijkstra(graph, start_point, 3)
+    for_storage = dijkstra(graph, start_point, 2)
     home = dijkstra(graph, start_point)
     ways = {}
     ways.update(home)
