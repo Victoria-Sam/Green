@@ -91,7 +91,7 @@ class BotBrains(QRunnable):
         '''
         self.get_best_ways(the_best_way(
             self.game.map.graph,
-            get_point(self.game.map.graph, self.game.home.idx))
+            self.game.home.idx)
         )
         while not self.game_end:
             self.update_map1()
@@ -163,7 +163,7 @@ class BotBrains(QRunnable):
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
-            self.game.home.town = self.game.posts[self.game.home.post_idx]
+            self.game.home.town = self.game.posts[self.game.home.idx]
 
             # !!! Тут должны быть апгрейды(вроде как)
             # if map_1_response.trains[0].next_level_price is not None:
@@ -243,7 +243,7 @@ class BotBrains(QRunnable):
         return flag1 and flag2
 
     def find_trains_way(self):
-        for train in self.game.trains:
+        for idx, train in self.game.trains.items():
             if self.current_ways.get(train.train_id):
                 if(train.speed == 0):
                     if len(self.current_ways[train.train_id]) != 1:

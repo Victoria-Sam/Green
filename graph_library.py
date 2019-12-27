@@ -321,7 +321,7 @@ class RenderArea(QGraphicsView):
         lines = {x.idx: x for x in list(filter(
             lambda scene_item: type(scene_item) == BestLine,
             self.scene().items()))}
-        all_nodes = {x.idx: x for x in list(filter(
+        all_nodes = {x.number: x for x in list(filter(
             lambda scene_item: type(scene_item) == BestNode,
             self.scene().items()))}
         post_nodes = [x for x in all_nodes.values() if x.type is not None]
@@ -352,6 +352,7 @@ class RenderArea(QGraphicsView):
         offset = 6
         for train in game.trains.values():
             train_on_map = all_trains[train.train_id]
+            print(train_on_map)
             current_line = lines[train.line_id]
             start_coords = [current_line.node_parent_1.rect().center().x(),
                             current_line.node_parent_1.rect().center().y()]
