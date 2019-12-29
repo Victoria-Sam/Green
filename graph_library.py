@@ -352,7 +352,6 @@ class RenderArea(QGraphicsView):
         offset = 6
         for train in game.trains.values():
             train_on_map = all_trains[train.train_id]
-            print(train_on_map)
             current_line = lines[train.line_id]
             start_coords = [current_line.node_parent_1.rect().center().x(),
                             current_line.node_parent_1.rect().center().y()]
@@ -364,13 +363,13 @@ class RenderArea(QGraphicsView):
                 start_coords[1] + train.position *
                 (end_coords[1] - start_coords[1]) / current_line.weight
                 ]
-            train_on_map[0].setPos(
+            train_on_map.setPos(
                 train_coords[0] - train_size/2 - offset/2 -
-                train_on_map[0].rect().x(),
+                train_on_map.rect().x(),
                 train_coords[1] - train_size/2 - offset/2 -
-                train_on_map[0].rect().y()
+                train_on_map.rect().y()
             )
-            train_on_map[0].icon.setPos(
+            train_on_map.icon.setPos(
                 train_coords[0] - train_size/2,
                 train_coords[1] - train_size/2
             )

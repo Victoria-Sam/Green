@@ -164,7 +164,8 @@ class BotBrains(QRunnable):
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
             self.game.home.town = self.game.posts[self.game.home.idx]
-
+            # output = open('output.txt', 'w')        # test info
+            # print(self.game.trains, '\n', file=output)
             # !!! Тут должны быть апгрейды(вроде как)
             # if map_1_response.trains[0].next_level_price is not None:
             #     if self.game.home.town.armor >=\
