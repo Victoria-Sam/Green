@@ -189,11 +189,11 @@ class ResponseParser:
             for key, value in event.items():
                 if key == "type":
                     temp_type = value
-                elif key == tick:
+                elif key == "tick":
                     temp_tick = value
                 else:
                     temp_event_param = value
-            temp_event = event_types[event["type"]](
+            temp_event = event_classes[event["type"]](
                 temp_type, temp_tick, temp_event_param
                 )
             events.append(temp_event)

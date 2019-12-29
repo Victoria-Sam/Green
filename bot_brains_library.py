@@ -109,6 +109,7 @@ class BotBrains(QRunnable):
         login_response = self.game.connection.login(self.game.user_name)
         self.game.home = login_response.home
         self.game.player_id = login_response.player_id
+        self.game.own_trains = login_response.trains
         self.nx_graph = nx.Graph()
         self.draw_map0()
 
@@ -158,7 +159,11 @@ class BotBrains(QRunnable):
     def update_map1(self):
         '''
         Получаем 1 слой и посылаем сигнал в основной поток для перерисовки
+        Также обновляем информацию о своих поездах
         '''
+        player_response = self.game.connection.player()
+        if player_response.result_code == 0:
+            self.game.own_trains = player_response.trains
         map_1_response, _ = self.game.connection.map1()
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts

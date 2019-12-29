@@ -35,5 +35,9 @@ class Connection:
             message_to_server(self.sock, 'UPGRADE', posts=posts,
                               trains=trains))
 
+    def player(self):
+        return ResponseParser.response_to_player_response(
+            message_to_server(self.sock, 'PLAYER'))
+
     def close(self):
         self.sock.close()
