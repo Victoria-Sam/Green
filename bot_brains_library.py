@@ -58,6 +58,9 @@ class BotBrains(QRunnable):
         # Add the callback signals
         self.signals = BotBrainsSignals()
         self.game = game
+        self.game.hijack_probability = 0.25
+        self.game.parasites_probability = 0.25
+        self.game.refugees_probability = 0.5
         self.current_ways = {}
         self.markets = None
         self.market_train = {}
@@ -110,6 +113,9 @@ class BotBrains(QRunnable):
         self.game.home = login_response.home
         self.game.player_id = login_response.player_id
         self.game.own_trains = login_response.trains
+        self.game.hijackers_cd = 0
+        self.game.parasites_cd = 0
+        self.game.refugees_cd = 0
         self.nx_graph = nx.Graph()
         self.draw_map0()
 
@@ -164,6 +170,19 @@ class BotBrains(QRunnable):
         player_response = self.game.connection.player()
         if player_response.result_code == 0:
             self.game.own_trains = player_response.trains
+        if self.game.hijackers_cd != 0:
+            self.game.hijackers_cd -= 1
+        if self.game.parasites_cd != 0:
+            self.game.parasites_cd -= 1
+        if self.game.refugees_cd != 0:
+            self.game.refugees_cd -= 1
+        for event in player_response.town.events:
+            if event.event_type == 2:
+                self.game.hijackers_cd += event.hijackers_power * 2
+            elif event.event_type == 3:
+                self.game.parasites_cd += event.parasites_power * 2
+            elif event.event_type == 4:
+                self.game.refugees_cd += event.refugees_number * 25
         map_1_response, _ = self.game.connection.map1()
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
@@ -250,16 +269,17 @@ class BotBrains(QRunnable):
 
     def find_trains_way(self):
         for idx, train in self.game.trains.items():
-            if self.current_ways.get(train.train_id):
-                if(train.speed == 0):
-                    if len(self.current_ways[train.train_id]) != 1:
-                        self.next_line(train)
-                    else:
-                        self.market_train.pop(
-                            self.current_ways[train.train_id].pop(0))
-                        self.current_ways.pop(train.train_id)
-                        if self.potencial_product.get(train.train_id):
-                            self.potencial_product.pop(train.train_id)
-                        self.start_way(train)
-            else:
-                self.start_way(train)
+            if train.cooldown == 0:
+                if self.current_ways.get(train.train_id):
+                    if(train.speed == 0):
+                        if len(self.current_ways[train.train_id]) != 1:
+                            self.next_line(train)
+                        else:
+                            self.market_train.pop(
+                                self.current_ways[train.train_id].pop(0))
+                            self.current_ways.pop(train.train_id)
+                            if self.potencial_product.get(train.train_id):
+                                self.potencial_product.pop(train.train_id)
+                            self.start_way(train)
+                else:
+                    self.start_way(train)

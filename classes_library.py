@@ -119,8 +119,7 @@ class Town(Post):
     population_capacity: int
     product: int
     product_capacity: int
-
-    # train_cooldown: int
+    train_cooldown: int
 
 
 @dataclass
@@ -161,8 +160,8 @@ class Rating:
 
 @dataclass
 class Train:
-    # cooldown: int
-    # events: List[Event]
+    cooldown: int
+    events: List[Event]
     # fuel: int
     # fuel_capacity: int
     # fuel_consumption: int

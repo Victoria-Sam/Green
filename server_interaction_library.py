@@ -103,7 +103,7 @@ class ResponseParser:
                 temp_posts_types[post["point_idx"]] = 1
                 temp_town = Town(
                     post["idx"],
-                    post["events"],
+                    events,
                     post["name"],
                     post["point_idx"],
                     post["type"],
@@ -116,14 +116,14 @@ class ResponseParser:
                     post["population_capacity"],
                     post["product"],
                     post["product_capacity"],
-                    # post["train_cooldown"]
+                    post["train_cooldown"]
                 )
                 posts[post["point_idx"]] = temp_town
             elif post["type"] == 2:
                 temp_posts_types[post["point_idx"]] = 2
                 temp_market = Market(
                     post["idx"],
-                    post["events"],
+                    events,
                     post["name"],
                     post["point_idx"],
                     post["type"],
@@ -136,7 +136,7 @@ class ResponseParser:
                 temp_posts_types[post["point_idx"]] = 3
                 temp_storage = Storage(
                     post["idx"],
-                    post["events"],
+                    events,
                     post["name"],
                     post["point_idx"],
                     post["type"],
@@ -151,13 +151,13 @@ class ResponseParser:
                                             rating["rating"], rating["town"])
 
         for train in all_trains:
-            # temp_events = list()
-            # for event in train["events"]:
-            #     temp_events.append(TrainCollisionEvent(1, event["tick"],
-            #                        event["train"]))
+            temp_events = list()
+            for event in train["events"]:
+                temp_events.append(TrainCollisionEvent(1, event["tick"],
+                                   event["train"]))
             temp_train = Train(
-                    # train["cooldown"],
-                    # temp_events,
+                    train["cooldown"],
+                    temp_events,
                     train["goods"],
                     train["goods_capacity"],
                     train["goods_type"],
@@ -199,7 +199,7 @@ class ResponseParser:
             events.append(temp_event)
         temp_town = Town(
                     town_info["idx"],
-                    town_info["events"],
+                    events,
                     town_info["name"],
                     town_info["point_idx"],
                     town_info["type"],
@@ -212,7 +212,7 @@ class ResponseParser:
                     town_info["population_capacity"],
                     town_info["product"],
                     town_info["product_capacity"],
-                    # town_info["train_cooldown"]
+                    town_info["train_cooldown"]
         )
 
         temp_home = Home(
@@ -221,13 +221,13 @@ class ResponseParser:
 
         trains = {}
         for train in resp["trains"]:
-            # temp_events = list()
-            # for event in train["events"]:
-            #     temp_events.append(TrainCollisionEvent(1, event["tick"],
-            #                        event["train"]))
+            temp_events = list()
+            for event in train["events"]:
+                temp_events.append(TrainCollisionEvent(1, event["tick"],
+                                   event["train"]))
             temp_train = Train(
-                    # train["cooldown"],
-                    # temp_events,
+                    train["cooldown"],
+                    temp_events,
                     train["goods"],
                     train["goods_capacity"],
                     train["goods_type"],
