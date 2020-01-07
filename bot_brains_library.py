@@ -62,7 +62,6 @@ class BotBrains(QRunnable):
         self.game.parasites_probability = 0.25
         self.game.refugees_probability = 0.5
         self.current_ways = {}
-        self.markets = None
         self.market_train = {}
 
     @pyqtSlot()
@@ -92,14 +91,9 @@ class BotBrains(QRunnable):
         '''
         Пока что while True, потом до ивента с концом игры
         '''
-        self.get_best_ways(the_best_way(
-            self.game.map.graph,
-            self.game.home.idx)
-        )
         while not self.game_end:
             self.update_map1()
             self.find_trains_way()
-            # time.sleep(0.5)
             self.turn()
 
     def get_city(self, idx):
@@ -120,14 +114,17 @@ class BotBrains(QRunnable):
         self.draw_map0()
 
     def get_best_ways(self, best_way):
-        self.best_ways_markets = {}
-        self.best_ways_storages = {}
+        best_ways_markets = {}
+        best_ways_storages = {}
         for key, val in best_way.items():
             if val[-2].points[1].point_type == 2 or \
                val[-2].points[0].point_type == 2:
-                self.best_ways_markets[key] = val
+                best_ways_markets[key] = val
             else:
-                self.best_ways_storages[key] = val
+                if val[-2].points[1].point_type == 3 or \
+               val[-2].points[0].point_type == 3:
+                    best_ways_storages[key] = val
+        return (best_ways_markets, best_ways_storages)
 
     def draw_map0(self):
         '''
@@ -198,88 +195,120 @@ class BotBrains(QRunnable):
             #             [], [map_1_response.trains[0].train_id])
         self.signals.update_map1.emit(self.game)
 
-    def move_trains(self, line_idx, speed, train_idx):
-        # пойми куда пойти
-        self.game.connection.move(line_idx, speed, train_idx)
+    def check_line(self, line):
+        for idx, train in self.game.trains.items():
+            if train.line_id == line and train.speed !=0:
+                return False
+        return True
+
+    def move_trains(self, line_idx, train, start_point):
+        line = self.game.map.graph.lines[line_idx]
+        rtrain = self.game.trains[train]
+        if self.check_line(line.idx):
+            if line.points[0].idx == start_point.idx:
+                self.game.connection.move(line.idx, 1, train)
+                rtrain.speed = 1
+                rtrain.position = 0
+                rtrain.line_id = line.idx
+            else:
+                self.game.connection.move(line.idx, -1, train)
+                rtrain.speed = -1
+                rtrain.position = line.length
+                rtrain.line_id = line.idx
+
 
     def turn(self):
         response = self.game.connection.turn()
         # print('turn end')
 
-    def next_line(self, train):
-        line = self.current_ways[train.train_id].pop(0)
-        if isinstance(line, list):
-            line = line[0]
-        # print(line)
-        train_line = get_line(self.game.map.graph, train.line_id)
+
+    def next_line(self, train, line):
+        train_line = self.game.map.graph.lines[train.line_id]
         train_point = train_line.points[0 if train.position == 0 else 1]
-        if get_line(self.game.map.graph, line.idx).points[0].idx == \
+        if self.game.map.graph.lines[line.idx].points[0].idx == \
                 train_point.idx:
             speed = 1
         else:
             speed = -1
-        self.move_trains(line.idx, speed, train.train_id)
+        
+        self.move_trains(line.idx, train.train_id, train_point)
 
-    def start_way(self, train):
+
+    def start_way(self, train, best_ways_markets, best_ways_storages, way_home):
         shortest = 1000000000
         best_way_storage = None
         best_storage = None
-        for key, val in self.best_ways_storages.items():
+        for key, val in best_ways_storages.items():
             if not best_way_storage or best_way_storage[-1] > val[-1]:
                 best_way_storage = val
                 best_storage = key
         best_market, best_way = self.choose_way(best_storage,
                                                 best_way_storage,
-                                                train)
-        best_way = best_way[0:-1]
+                                                train, best_ways_markets, way_home)
         if best_way:
+            best_way = best_way[0:-1]
             self.market_train[best_market] = train.train_id
-            self.current_ways[train.train_id] = best_way
-            self.current_ways[train.train_id] += best_way[::-1]
-            self.current_ways[train.train_id].append(best_market)
-            self.next_line(train)
+            self.current_ways[train.train_id] = best_market
+            self.next_line(train, best_way[0])
 
-    def choose_way(self, best_storage, best_way_storage, train):
+
+    def choose_way(self, best_storage, best_way_storage, train, best_ways_markets, way_home):
         best_way_market = None
         best_market = None
-        for key, val in self.best_ways_markets.items():
-            if not self.market_train.get(key):
-                market = self.get_city(key)
-                if not best_way_market:
-                    best_way_market = val
-                    best_market = market
-                if self.isEnough(best_way_storage, market, val, train):
+        for key, val in best_ways_markets.items():
+            market = self.get_city(key)
+            if not best_way_market:
+                best_way_market = val
+                best_market = market
+            if self.isEnough(best_way_storage, market, val, train, way_home):
+                if best_storage and best_way_storage:
                     return (best_storage, best_way_storage)
-                if min(best_market.product, train.goods_capacity) -\
-                    2*best_way_market[-1] <\
-                        min(market.product, train.goods_capacity) - 2*val[-1]:
-                    best_market = market
-                    best_way_market = val
-        self.potencial_product[train.train_id] = min(best_market.product,
-                                                     train.goods_capacity)
-        return (best_market.point_id, best_way_market)
+            if min(best_market.product, train.goods_capacity) -\
+                2*best_way_market[-1] <\
+                    min(market.product, train.goods_capacity) - 2*val[-1]:
+                best_market = market
+                best_way_market = val
+        if best_market and best_way_market:
+            return (best_market.point_id, best_way_market)
+        return (None,None)
 
-    def isEnough(self, best_way_storage, market, way_market, train):
+
+    def isEnough(self, best_way_storage, market, way_market, train, way_home):
         potencial = sum(self.potencial_product.values())
         flag1 = (self.game.home.town.product + potencial) /\
             (self.game.home.town.population+2) >\
-            2*best_way_storage[-1] + 2 * way_market[-1]
+            2*best_way_storage[-1] + 2 * way_market[-1] + 3*way_home
         flag2 = min(market.product, train.goods_capacity) > 2*way_market[-1]
         return flag1 and flag2
+    
+
+    def move_home(self, train):
+        start_line = self.game.map.graph.lines[train.line_id]
+        start_point = start_line.points[0] if train.position == 0 else start_line.points[1]
+        way = the_best_way(self.game.map.graph, start_point.idx, train.train_id, self.game.trains).get(self.game.home.idx)
+        if way:
+            self.move_trains(way[0].idx, train.train_id, start_point)
+
+
+    def move_for_goods(self, train):
+        start_line = self.game.map.graph.lines[train.line_id]
+        start_point = start_line.points[0] if train.position == 0 else start_line.points[1]
+        ways = the_best_way(self.game.map.graph, start_point.idx, train.train_id, self.game.trains)
+        best_ways_markets, best_ways_storages = self.get_best_ways(ways)
+        way_home = ways.get(self.game.home.idx)
+        if way_home:
+            self.start_way(train, best_ways_markets, best_ways_storages, way_home[-1])
+        else:
+            self.start_way(train, best_ways_markets, best_ways_storages, 100000)
+
 
     def find_trains_way(self):
+           # train = self.game.trains[1]
+          #  idx = 1
         for idx, train in self.game.trains.items():
             if train.cooldown == 0:
-                if self.current_ways.get(train.train_id):
-                    if(train.speed == 0):
-                        if len(self.current_ways[train.train_id]) != 1:
-                            self.next_line(train)
-                        else:
-                            self.market_train.pop(
-                                self.current_ways[train.train_id].pop(0))
-                            self.current_ways.pop(train.train_id)
-                            if self.potencial_product.get(train.train_id):
-                                self.potencial_product.pop(train.train_id)
-                            self.start_way(train)
-                else:
-                    self.start_way(train)
+                if(train.speed == 0):
+                    if train.goods == 0:
+                        self.move_for_goods(train)
+                    else:
+                        self.move_home(train)
