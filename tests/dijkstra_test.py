@@ -1,12 +1,25 @@
 import unittest
+import sys
+sys.path.extend([".."])
 
 from dijkstra import dijkstra, the_best_way
-from classes_library import Line, Point, Graph
+from classes_library import Line, Point, Graph, Train
 
 
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.all_trains = {
+            1: Train(cooldown=1, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=1, level=1, line_id=3,
+                     next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=0, speed=0),
+            2: Train(cooldown=2, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=2, level=1, line_id=8,
+                     next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=6, speed=0),
+            3: Train(cooldown=3, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=3, level=1,
+                     line_id=13, next_level_price=40, player_id='ff4b8b11-8eb7-4c9c', position=5, speed=0),
+            4: Train(cooldown=4, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=4, level=1,
+                     line_id=12, next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349', position=3, speed=0)
+        }
+
         self.points = points = {
             0: Point(idx=0, post_id=0, point_type=1),
             1: Point(idx=1, post_id=0, point_type=None),
@@ -39,28 +52,27 @@ class MyTestCase(unittest.TestCase):
         self.graph = Graph(points, edges)
 
     def test_dijkstra1(self):
-        result = dijkstra(self.graph, 0, 3)
-        self.assertEqual(result[2][0].idx, 3)
-        self.assertEqual(result[2][1].idx, 10)
-        self.assertEqual(result[2][2].idx, 11)
-        self.assertEqual(result[2][-1], 14)
+        result = dijkstra(self.graph, 0, 1, self.all_trains, 3)
+        self.assertEqual(result[2][0].idx, 2)
+        self.assertEqual(result[2][1].idx, 7)
+        self.assertEqual(result[2][-1], 15)
 
     def test_dijkstra2(self):
-        result = dijkstra(self.graph, 3)
+        result = dijkstra(self.graph, 3, 4, self.all_trains)
         self.assertEqual(result[7][0].idx, 14)
         self.assertEqual(result[7][-1], 9)
         self.assertEqual(result[0][0].idx, 12)
-        self.assertEqual(result[0][1].idx, 11)
-        self.assertEqual(result[0][2].idx, 10)
-        self.assertEqual(result[0][3].idx, 3)
-        self.assertEqual(result[0][-1], 17)
+        self.assertEqual(result[0][1].idx, 7)
+        self.assertEqual(result[0][2].idx, 2)
+        self.assertEqual(result[0][-1], 18)
+        self.assertEqual(result[2][0].idx, 12)
+        self.assertEqual(result[2][-1], 3)
 
     def test_the_best_way(self):
-        result = the_best_way(self.graph, 0)
-        self.assertEqual(result[2][0].idx, 3)
-        self.assertEqual(result[2][1].idx, 10)
-        self.assertEqual(result[2][2].idx, 11)
-        self.assertEqual(result[2][-1], 14)
+        result = the_best_way(self.graph, 0, 1, self.all_trains)
+        self.assertEqual(result[2][0].idx, 2)
+        self.assertEqual(result[2][1].idx, 7)
+        self.assertEqual(result[2][-1], 15)
 
 
 if __name__ == '__main__':

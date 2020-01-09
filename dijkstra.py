@@ -36,7 +36,7 @@ class PriorityQueue:
         raise KeyError('pop from an empty priority queue')
 
 
-def dijkstra(graph, start_point, forbidden_type=0):  # index os start point in dictionary graph.points
+def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
     dict_of_dist = {key: float('inf') for (key, value) in graph.points.items()}
     dict_of_edge_to = {key: None for (key, value) in graph.points.items()}
     dict_of_marks = {key: False for (key, value) in graph.points.items()}
@@ -56,13 +56,32 @@ def dijkstra(graph, start_point, forbidden_type=0):  # index os start point in d
     priority.add_point(index_of_start, 0)
     dict_of_dist[index_of_start] = 0
 
+    # finding forbidden points or lines
+    forbidden_trains_points = []
+    forbidden_lines_with_trains = []
+    for train_id, value in all_trains.items():
+        if train != train_id:
+            forbidden_line = graph.lines[value.line_id]
+            # adding forbidden line
+            if value.position != 0 and value.position != forbidden_line.length:
+                forbidden_lines_with_trains.append(forbidden_line)
+            # adding forbidden point
+            else:
+                if value.position == 0 and forbidden_line.points[0].point_type != 1:
+                    forbidden_trains_points.append(forbidden_line.points[0])
+                if value.position == forbidden_line.length and forbidden_line.points[1].point_type != 1:
+                    forbidden_trains_points.append(forbidden_line.points[1])
+
     while False in dict_of_marks.values():  # dijkstra
         index_of_start = priority.pop_point()
         dict_of_marks[index_of_start] = True
         start = index_of_start
-        if graph.points[start].point_type == forbidden_type:
+        # Delete point with forbidden type
+        if graph.points[start].point_type == forbidden_type or graph.points[start] in forbidden_trains_points:
             continue
         for edge in adjacency_list[index_of_start]:
+            if edge in forbidden_lines_with_trains:
+                continue
             index_of_neighbour = edge.points[0 if edge.points[1].idx == start else 1].idx
             new_path_length = edge.length + dict_of_dist[index_of_start]
             if new_path_length < dict_of_dist[index_of_neighbour]:
@@ -98,13 +117,12 @@ def dijkstra(graph, start_point, forbidden_type=0):  # index os start point in d
     return dict_of_shortest_ways
 
 
-def the_best_way(graph, start_point):
+def the_best_way(graph, start_point, train, all_trains):
     """Builder, which make all shortest ways for destinations."""
-    for_market = dijkstra(graph, start_point, 3)
-    for_storage = dijkstra(graph, start_point, 2)
-    home = dijkstra(graph, start_point)
-    ways = {}
-    ways.update(home)
+    for_market = dijkstra(graph, start_point, train, all_trains, 3)
+    for_storage = dijkstra(graph, start_point, train, all_trains, 2)
+    home = dijkstra(graph, start_point, train, all_trains)
+    ways = dict(filter(lambda kv: graph.points[kv[0]].point_type == 1, home.items()))
     ways.update(for_market)
     ways.update(for_storage)
     return ways
