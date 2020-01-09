@@ -63,6 +63,7 @@ class BotBrains(QRunnable):
         self.game.refugees_probability = 0.5
         self.current_ways = {}
         self.market_train = {}
+        self.trains_for_armor = {}
 
     @pyqtSlot()
     def run(self):
@@ -94,6 +95,7 @@ class BotBrains(QRunnable):
         while not self.game_end:
             self.update_map1()
             self.find_trains_way()
+            self.upgrate_trains()
             self.turn()
 
     def get_city(self, idx):
@@ -112,6 +114,14 @@ class BotBrains(QRunnable):
         self.game.refugees_cd = 0
         self.nx_graph = nx.Graph()
         self.draw_map0()
+
+    def upgrate_trains(self):
+        for idx, train in self.game.trains.items():
+            if train.next_level_price < self.game.home.town.armor and \
+                    self.game.home.town.armor-train.next_level_price > 50:
+                self.game.connection.upgrade([],[train.train_id])
+                self.game.home.town.armor -= train.next_level_price
+
 
     def get_best_ways(self, best_way):
         best_ways_markets = {}
@@ -288,12 +298,15 @@ class BotBrains(QRunnable):
 
 
     def isEnough(self, best_way_storage, market, way_market, train, way_home):
-        potencial = sum(self.potencial_product.values())
-        flag1 = (self.game.home.town.product + potencial) /\
-            (self.game.home.town.population+2) >\
-            2*best_way_storage[-1] + 2 * way_market[-1] + 3*way_home
-        flag2 = min(market.product, train.goods_capacity) > 2*way_market[-1]
-        return flag1 and flag2
+        potencial = self.potencial_product
+        if (self.trains_for_armor.get(train.train_id) or len(self.trains_for_armor) + self.trains_with_armor < 1) and \
+            self.game.home.town.product_capacity-self.game.home.town.product < potencial: 
+            if not self.trains_for_armor.get(train.train_id):
+                self.trains_for_armor[train.train_id] = 1
+            return True
+        if self.trains_for_armor.get(train.train_id):
+                self.trains_for_armor.pop(train.train_id)
+        return False
     
 
     def move_home(self, train):
@@ -318,6 +331,15 @@ class BotBrains(QRunnable):
 
     def find_trains_way(self):
         self.market_train = {}
+        self.potencial_product = 0
+        self.trains_with_armor = 0
+        for idx, train in self.game.trains.items():
+            if train.goods_type == 2:
+                self.potencial_product += train.goods
+            if train.goods_type == 1:
+                if self.trains_for_armor.get(idx):
+                    self.trains_for_armor.pop(idx)
+                self.trains_with_armor +=1
         for idx, train in self.game.trains.items():
             if train.cooldown == 0:
                 if(train.speed == 0):
