@@ -57,6 +57,8 @@ class BotBrains(QRunnable):
 
         # Add the callback signals
         self.signals = BotBrainsSignals()
+
+        # Add the game parametres
         self.game = game
         self.game.hijack_probability = 0.25
         self.game.parasites_probability = 0.25
@@ -97,6 +99,11 @@ class BotBrains(QRunnable):
             self.find_trains_way()
             self.upgrate_trains()
             self.turn()
+        
+        self.signals.finished.emit()
+        time.sleep(5)
+        Connection().close()
+        sys.exit()
 
     def get_city(self, idx):
         return self.game.posts[idx]
@@ -190,19 +197,13 @@ class BotBrains(QRunnable):
                 self.game.parasites_cd += event.parasites_power * 2
             elif event.event_type == 4:
                 self.game.refugees_cd += event.refugees_number * 25
+            elif event.event_type == 100:
+                self.game_end = True
         map_1_response, _ = self.game.connection.map1()
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
             self.game.home.town = self.game.posts[self.game.home.idx]
-            # output = open('output.txt', 'w')        # test info
-            # print(self.game.trains, '\n', file=output)
-            # !!! Тут должны быть апгрейды(вроде как)
-            # if map_1_response.trains[0].next_level_price is not None:
-            #     if self.game.home.town.armor >=\
-            #             map_1_response.trains[0].next_level_price:
-            #         self.game.connection.upgrade(
-            #             [], [map_1_response.trains[0].train_id])
         self.signals.update_map1.emit(self.game)
 
     def check_line(self, line, start_point):

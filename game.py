@@ -34,10 +34,12 @@ class Game:
         self.threadpool.start(bot_brains)
 
     def print_output(self, s):
-        print(s)
+        pass
+        # print(s)
 
     def thread_complete(self):
-        print("THREAD COMPLETE!")
+        pass
+        # print("THREAD COMPLETE!")
 
     def closeEvent(self, event):
         self.threadpool.clear()
