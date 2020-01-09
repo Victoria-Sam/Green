@@ -112,15 +112,18 @@ class BotBrains(QRunnable):
         '''
         Логинимся и рисуем начальную карту (0 слой)
         '''
-        login_response = self.game.connection.login(self.game.user_name)
-        self.game.home = login_response.home
-        self.game.player_id = login_response.player_id
-        self.game.own_trains = login_response.trains
-        self.game.hijackers_cd = 0
-        self.game.parasites_cd = 0
-        self.game.refugees_cd = 0
-        self.nx_graph = nx.Graph()
-        self.draw_map0()
+        login_response = self.game.connection.login(self.game.user_name,
+                                                    self.game.user_password,
+                                                    self.game.name)
+        if login_response is not None:
+            self.game.home = login_response.home
+            self.game.player_id = login_response.player_id
+            self.game.own_trains = login_response.trains
+            self.game.hijackers_cd = 0
+            self.game.parasites_cd = 0
+            self.game.refugees_cd = 0
+            self.nx_graph = nx.Graph()
+            self.draw_map0()
 
     def upgrate_trains(self):
         for idx, train in self.game.trains.items():
