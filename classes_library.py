@@ -215,7 +215,7 @@ class Map10Response(Response):
 
 
 @dataclass
-class GamesResponce(Response):
+class GamesResponse(Response):
     games: Dict[str, Game]
 
 

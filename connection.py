@@ -9,9 +9,10 @@ class Connection:
             cls.sock.connect(('wgforge-srv.wargaming.net', 443))
         return cls.instance
 
-    def login(self, name):
+    def login(self, name, temp_password, game_name):
         return ResponseParser.response_to_player_response(
-            message_to_server(self.sock, 'LOGIN', name=name))
+            message_to_server(self.sock, 'LOGIN', name=name,
+                              password = temp_password, game = game_name))
 
     def map0(self):
         return ResponseParser.response_to_map0_response(
@@ -38,6 +39,10 @@ class Connection:
     def player(self):
         return ResponseParser.response_to_player_response(
             message_to_server(self.sock, 'PLAYER'))
+
+    def games(self):
+        return ResponseParser.response_to_games_response(
+            message_to_server(self.sock, 'GAMES'))
 
     def close(self):
         self.sock.close()

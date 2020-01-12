@@ -9,12 +9,17 @@ from game import Game
 
 
 if __name__ == '__main__':
+    connection = Connection()
+    all_games = connection.games() # dict of current games, key == name
+    user_name = 'GreenTeam'
+    user_password = ''
+    game_name = 'Dream Green'
     app = QApplication(sys.argv)
     app.aboutToQuit.connect(app.deleteLater)
-    app.setStyle(QStyleFactory.create("gtk"))
+    app.setStyle(QStyleFactory.create('gtk'))
     screen = GraphWidget()
     screen.show()
-    game = Game(app, screen)
+    game = Game(app, screen, user_name, connection, user_password, game_name)
     app.exec_()
 
     Connection().close()

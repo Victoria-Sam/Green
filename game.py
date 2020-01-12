@@ -4,11 +4,12 @@ from bot_brains_library import BotBrains
 
 
 class Game:
-    def __init__(self, app, screen):
-        self.user_name = 'Boris'
-        self.user_password = 'password'
-        self.connection = Connection()
-
+    def __init__(self, app, screen, user_name, connection,
+                 user_password, game_name):
+        self.user_name = user_name
+        self.user_password = user_password
+        self.name = game_name
+        self.connection = connection
         self.threadpool = QThreadPool()
         self.app = app
         self.screen = screen
