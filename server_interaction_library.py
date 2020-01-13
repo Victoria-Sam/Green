@@ -256,13 +256,33 @@ class ResponseParser:
                 trains
             )
             return player_response
+        else:
+            return PlayerResponse(result["result_code"],
+                                  result["response_length"],
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  result["response"])
+
+    @staticmethod
+    def response_to_logout_response(result) -> LogoutResponse:
+        if result["result_code"] == 0:
+            return LogoutResponse(0, 0)
+        else:
+            return LogoutResponse(result["result_code"],
+                                  result["response_length"],
+                                  result["response"])
 
     @staticmethod
     def response_to_upgrade_response(result) -> UpgradeResponse:
         if result["result_code"] == 0:
             return UpgradeResponse(0, 0)
         else:
-            return UpgradeResponse(result["result_code"], 
+            return UpgradeResponse(result["result_code"],
                                    result["response_length"],
                                    result["response"])
 
@@ -271,7 +291,7 @@ class ResponseParser:
         if result["result_code"] == 0:
             return TurnResponse(0, 0)
         else:
-            return TurnResponse(result["result_code"], 
+            return TurnResponse(result["result_code"],
                                 result["response_length"],
                                 result["response"])
 
