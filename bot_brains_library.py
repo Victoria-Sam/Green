@@ -87,7 +87,7 @@ class BotBrains(QRunnable):
         Основный цикл бота: подвинь поезд, заверши ход, обнови карту
         '''
         res = self.init_bot()
-        self.potencial_product = {}
+        self.potential_product = {}
         self.game_end = False
 
         if res:
@@ -315,11 +315,11 @@ class BotBrains(QRunnable):
         return (None, None)
 
     def isEnough(self, best_way_storage, market, way_market, train, way_home):
-        potencial = self.potencial_product
+        potential = self.potential_product
         if (self.trains_for_armor.get(train.train_id) or
             len(self.trains_for_armor) + self.trains_with_armor < 1) and\
             self.game.home.town.product_capacity - self.game.home.town.product\
-                < potencial:
+                < potential:
             if not self.trains_for_armor.get(train.train_id):
                 self.trains_for_armor[train.train_id] = 1
             return True
@@ -354,18 +354,18 @@ class BotBrains(QRunnable):
 
     def find_trains_way(self):
         self.market_train = {}
-        self.potencial_product = 0
+        self.potential_product = 0
         self.trains_with_armor = 0
         for idx, train in self.game.trains.items():
             if train.goods_type == 2:
-                self.potencial_product += train.goods
+                self.potential_product += train.goods
             if train.goods_type == 1:
                 if self.trains_for_armor.get(idx):
                     self.trains_for_armor.pop(idx)
                 self.trains_with_armor += 1
         for idx, train in self.game.trains.items():
             if train.cooldown == 0:
-                if (train.speed == 0):
+                if train.speed == 0:
                     if train.goods == 0:
                         self.move_for_goods(train)
                     else:

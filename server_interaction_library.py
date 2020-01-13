@@ -1,11 +1,8 @@
 import socket
 import json
 import networkx as nx
-from classes_library import *
-#     Response, Map0Response, Map10Response,\
-#     Map1Response, PlayerResponse, Map, Point, Line, Graph, Town, Market,\
-#     Storage, Rating, Train, Home, Event, TrainCollisionEvent
 
+from classes_library import *
 from typing import List, Dict
 
 action_types = {'LOGIN': 1, 'LOGOUT': 2, 'MOVE': 3, 'UPGRADE': 4, 'TURN': 5,
@@ -26,8 +23,7 @@ event_classes = {
 def print_server_message(result):
     print("Result code:", result["result_code"])
     print("Response length:", result["response_length"])
-    print("Response:")
-    print(result["response"])
+    print("Response:\n", result["response"])
 
 
 class ResponseParser:

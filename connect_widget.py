@@ -133,7 +133,7 @@ class GamesTable(QTableWidget):
             self.setItem(
                 row, 0, self.create_table_item(game.name))
             self.setItem(
-                ow, 1, self.create_table_item(str(game.num_players)))
+                row, 1, self.create_table_item(str(game.num_players)))
             self.setItem(
                 row, 2, self.create_table_item(str(game.num_turns)))
             self.setItem(
