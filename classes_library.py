@@ -12,6 +12,12 @@ event_types = {
     "GAME_OVER": 100
 }
 
+game_states = {
+    1: "INIT",
+    2: "RUN",
+    3: "FINISHED"
+}
+
 
 @dataclass
 class Event:
@@ -192,6 +198,7 @@ class PlayerResponse(Response):
     rating: int
     town: Town
     trains: Dict[int, Train]
+    error: str = None
 
 
 @dataclass
@@ -226,6 +233,11 @@ class UpgradeResponse(Response):
 
 @dataclass
 class TurnResponse(Response):
+    error: str = None
+
+
+@dataclass
+class LogoutResponse(Response):
     error: str = None
 
 

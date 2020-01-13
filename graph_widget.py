@@ -1,12 +1,14 @@
-from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout, QGraphicsScene
-from graph_library import RenderArea
 import networkx as nx
+from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout, QGraphicsScene
+
+from graph_library import RenderArea
 
 
 class GraphWidget(QWidget):
-    def __init__(self):
+    def __init__(self, connect_widget):
         super(GraphWidget, self).__init__()
 
+        self.connect_widget = connect_widget
         self.__init_ui()
 
     def __init_ui(self):
@@ -38,3 +40,8 @@ class GraphWidget(QWidget):
         center_point = QApplication.desktop().screenGeometry(screen).center()
         frame_gm.moveCenter(center_point)
         self.move(frame_gm.topLeft())
+
+    def closeEvent(self, event):
+        self.connect_widget.game.event_stop.set()
+        self.connect_widget.game.threadpool.clear()
+        self.connect_widget.show()

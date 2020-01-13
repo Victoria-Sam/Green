@@ -1,11 +1,8 @@
 import socket
 import json
 import networkx as nx
-from classes_library import *
-#     Response, Map0Response, Map10Response,\
-#     Map1Response, PlayerResponse, Map, Point, Line, Graph, Town, Market,\
-#     Storage, Rating, Train, Home, Event, TrainCollisionEvent
 
+from classes_library import *
 from typing import List, Dict
 
 action_types = {'LOGIN': 1, 'LOGOUT': 2, 'MOVE': 3, 'UPGRADE': 4, 'TURN': 5,
@@ -26,8 +23,7 @@ event_classes = {
 def print_server_message(result):
     print("Result code:", result["result_code"])
     print("Response length:", result["response_length"])
-    print("Response:")
-    print(result["response"])
+    print("Response:\n", result["response"])
 
 
 class ResponseParser:
@@ -41,17 +37,18 @@ class ResponseParser:
             resp = result["response"]
             temp_points = {}
             for point in resp["points"]:
-                temp_points[point["idx"]] = Point(point["idx"], point["post_idx"])
+                temp_points[point["idx"]] = Point(point["idx"],
+                                                  point["post_idx"])
             temp_lines = {}
             for line in resp["lines"]:
                 temp_vertexes = [temp_points[line["points"][0]],
-                                temp_points[line["points"][1]]]
+                                 temp_points[line["points"][1]]]
                 temp_lines[line["idx"]] = Line(line["idx"], line["length"],
-                                            temp_vertexes)
+                                               temp_vertexes)
             temp_graph = Graph(temp_points, temp_lines)
             temp_map = Map(resp["idx"], resp["name"], temp_graph)
-            return Map0Response(result["result_code"], result["response_length"],
-                                temp_map)
+            return Map0Response(result["result_code"],
+                                result["response_length"], temp_map)
 
     @staticmethod
     def response_to_map1_response(result) -> Map1Response:
@@ -149,14 +146,16 @@ class ResponseParser:
                     posts[post["point_idx"]] = temp_storage
 
             for rating in all_ratings.values():
-                ratings[rating["idx"]] = Rating(rating["idx"], rating["name"],
-                                                rating["rating"], rating["town"])
+                ratings[rating["idx"]] = Rating(rating["idx"],
+                                                rating["name"],
+                                                rating["rating"],
+                                                rating["town"])
 
             for train in all_trains:
                 temp_events = list()
                 for event in train["events"]:
-                    temp_events.append(TrainCollisionEvent(1, event["tick"],
-                                    event["train"]))
+                    temp_events.append(
+                        TrainCollisionEvent(1, event["tick"], event["train"]))
                 temp_train = Train(
                         train["cooldown"],
                         temp_events,
@@ -172,8 +171,12 @@ class ResponseParser:
                         train["speed"]
                 )
                 trains[train["idx"]] = temp_train
-            return Map1Response(result["result_code"], result["response_length"],
-                                resp["idx"], posts, ratings, trains),\
+            return Map1Response(result["result_code"],
+                                result["response_length"],
+                                resp["idx"],
+                                posts,
+                                ratings,
+                                trains),\
                 temp_posts_types
 
     @staticmethod
@@ -226,8 +229,8 @@ class ResponseParser:
             for train in resp["trains"]:
                 temp_events = list()
                 for event in train["events"]:
-                    temp_events.append(TrainCollisionEvent(1, event["tick"],
-                                    event["train"]))
+                    temp_events.append(
+                        TrainCollisionEvent(1, event["tick"], event["train"]))
                 temp_train = Train(
                         train["cooldown"],
                         temp_events,
@@ -256,13 +259,33 @@ class ResponseParser:
                 trains
             )
             return player_response
+        else:
+            return PlayerResponse(result["result_code"],
+                                  result["response_length"],
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  None,
+                                  result["response"])
+
+    @staticmethod
+    def response_to_logout_response(result) -> LogoutResponse:
+        if result["result_code"] == 0:
+            return LogoutResponse(0, 0)
+        else:
+            return LogoutResponse(result["result_code"],
+                                  result["response_length"],
+                                  result["response"])
 
     @staticmethod
     def response_to_upgrade_response(result) -> UpgradeResponse:
         if result["result_code"] == 0:
             return UpgradeResponse(0, 0)
         else:
-            return UpgradeResponse(result["result_code"], 
+            return UpgradeResponse(result["result_code"],
                                    result["response_length"],
                                    result["response"])
 
@@ -271,7 +294,7 @@ class ResponseParser:
         if result["result_code"] == 0:
             return TurnResponse(0, 0)
         else:
-            return TurnResponse(result["result_code"], 
+            return TurnResponse(result["result_code"],
                                 result["response_length"],
                                 result["response"])
 
@@ -285,7 +308,7 @@ class ResponseParser:
                                 result["response"])
 
     @staticmethod
-    def response_to_games_response(result) ->GamesResponse:
+    def response_to_games_response(result) -> GamesResponse:
         resp = result["response"]
         games = {}
 
@@ -296,8 +319,9 @@ class ResponseParser:
                                        game["state"])
 
         return GamesResponse(result["result_code"],
-                            result["response_length"],
-                            games)
+                             result["response_length"],
+                             games)
+
 
 def message_to_server(sock, action, json_mode=True, **kwargs):
     '''

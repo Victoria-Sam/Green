@@ -269,47 +269,51 @@ class RenderArea(QGraphicsView):
             node_parent_2.lines.append(best_line)
 
         for train in game.trains.values():
-            lines = {x.idx: x for x in list(filter(
-                lambda scene_item: type(scene_item) == BestLine,
-                self.scene().items()))}
-            current_line = lines[train.line_id]
-            start_coords = [current_line.node_parent_1.rect().center().x(),
-                            current_line.node_parent_1.rect().center().y()]
-            end_coords = [current_line.node_parent_2.rect().center().x(),
-                          current_line.node_parent_2.rect().center().y()]
-            train_coords = [
-                start_coords[0] + train.position *
-                (end_coords[0] - start_coords[0]) / current_line.weight,
-                start_coords[1] + train.position *
-                (end_coords[1] - start_coords[1]) / current_line.weight
-                ]
-            train_size = 12
-            offset = 6
-            train_visual = QTrain(
-                train.train_id,
-                train_coords[0] - train_size/2 - offset/2,
-                train_coords[1] - train_size/2 - offset/2,
-                train_size + offset,
-                train_size + offset)
-            train_pixmap = QPixmap(icon_address[4])
-            train_pixmap = QGraphicsPixmapItem(
-                train_pixmap.scaled(train_size, train_size))
-            train_pixmap.setPos(train_coords[0] - train_size/2,
-                                train_coords[1] - train_size/2,)
-            train_pixmap.setZValue(5)
-            train_visual.icon = train_pixmap
-            train_visual.setZValue(4)
-            pen = QPen(QColor("red"))
-            pen.setWidth(1)
-            if train.player_id == game.player_id:
-                train_visual.setPen(pen)
-            else:
-                pen.setColor(QColor("blue"))
-                train_visual.setPen(pen)
-            self.scene().addItem(train_visual)
-            self.scene().addItem(train_pixmap)
+            self.draw_train(train, game.player_id)
 
         self.update_view()
+
+    def draw_train(self, train, player_id):
+        lines = {x.idx: x for x in list(filter(
+            lambda scene_item: type(scene_item) == BestLine,
+            self.scene().items()))}
+        current_line = lines[train.line_id]
+        start_coords = [current_line.node_parent_1.rect().center().x(),
+                        current_line.node_parent_1.rect().center().y()]
+        end_coords = [current_line.node_parent_2.rect().center().x(),
+                      current_line.node_parent_2.rect().center().y()]
+        train_coords = [
+            start_coords[0] + train.position *
+            (end_coords[0] - start_coords[0]) / current_line.weight,
+            start_coords[1] + train.position *
+            (end_coords[1] - start_coords[1]) / current_line.weight
+        ]
+        train_size = 12
+        offset = 6
+        train_visual = QTrain(
+            train.train_id,
+            train_coords[0] - train_size / 2 - offset / 2,
+            train_coords[1] - train_size / 2 - offset / 2,
+            train_size + offset,
+            train_size + offset)
+        train_pixmap = QPixmap(icon_address[4])
+        train_pixmap = QGraphicsPixmapItem(
+            train_pixmap.scaled(train_size, train_size))
+        train_pixmap.setPos(train_coords[0] - train_size / 2,
+                            train_coords[1] - train_size / 2, )
+        train_pixmap.setZValue(5)
+        train_visual.icon = train_pixmap
+        train_visual.setZValue(4)
+        pen = QPen(QColor("red"))
+        pen.setWidth(1)
+        if train.player_id == player_id:
+            train_visual.setPen(pen)
+        else:
+            pen.setColor(QColor("blue"))
+            train_visual.setPen(pen)
+        self.scene().addItem(train_visual)
+        self.scene().addItem(train_pixmap)
+        return train_visual
 
     def update_map1(self, game):
         '''
@@ -318,6 +322,12 @@ class RenderArea(QGraphicsView):
         all_trains = {x.idx: x for x in list(filter(
             lambda scene_item: type(scene_item) == QTrain,
             self.scene().items()))}
+
+        for train in game.trains.values():
+            if train.train_id not in all_trains.keys():
+                train_visual = self.draw_train(train, game.player_id)
+                all_trains[train.train_id] = train_visual
+
         lines = {x.idx: x for x in list(filter(
             lambda scene_item: type(scene_item) == BestLine,
             self.scene().items()))}
