@@ -155,7 +155,7 @@ class NewGamePopup(QDialog):
             self.user_name = self.__user_name_text_box.text()
             self.user_password = self.__user_password_text_box.text()
             self.game_name = self.__game_name_text_box.text()
-            self.num_turns = self.__num_turns_text_box.text()
-            self.num_players = self.__num_players_text_box.text()
+            self.num_turns = int(self.__num_turns_text_box.text())
+            self.num_players = int(self.__num_players_text_box.text())
 
             self.accept()
