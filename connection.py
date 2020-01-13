@@ -14,7 +14,9 @@ class Connection:
         return ResponseParser.response_to_player_response(
             message_to_server(self.sock, 'LOGIN', name=name,
                               password=temp_password, game=game_name,
-                              num_turns=num_turns, num_players=num_players))
+                              num_turns=num_turns,
+                              # num_players=num_players
+                              ))
 
     def logout(self):
         return ResponseParser.response_to_logout_response(

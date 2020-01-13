@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QIntValidator, QValidator
-from PyQt5.QtWidgets import QApplication, QGridLayout, QDialog, QLabel, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QApplication, QGridLayout, QDialog, QLabel,\
+                            QLineEdit, QPushButton
 
 
 class SignInPopup(QDialog):
@@ -82,10 +83,12 @@ class NewGamePopup(QDialog):
         # Creating validators
         self.__num_turns_text_box.setValidator(QIntValidator(-1, 1000000))
         self.__num_turns_text_box.textChanged.connect(self.check_state)
-        self.__num_turns_text_box.textChanged.emit(self.__num_turns_text_box.text())
+        self.__num_turns_text_box.textChanged.emit(
+            self.__num_turns_text_box.text())
         self.__num_players_text_box.setValidator(QIntValidator(1, 10))
         self.__num_players_text_box.textChanged.connect(self.check_state)
-        self.__num_players_text_box.textChanged.emit(self.__num_players_text_box.text())
+        self.__num_players_text_box.textChanged.emit(
+            self.__num_players_text_box.text())
 
         # Creating buttons
         self.__create_new_game_button = QPushButton('Create New Game')

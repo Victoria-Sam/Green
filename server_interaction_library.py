@@ -41,17 +41,18 @@ class ResponseParser:
             resp = result["response"]
             temp_points = {}
             for point in resp["points"]:
-                temp_points[point["idx"]] = Point(point["idx"], point["post_idx"])
+                temp_points[point["idx"]] = Point(point["idx"],
+                                                  point["post_idx"])
             temp_lines = {}
             for line in resp["lines"]:
                 temp_vertexes = [temp_points[line["points"][0]],
-                                temp_points[line["points"][1]]]
+                                 temp_points[line["points"][1]]]
                 temp_lines[line["idx"]] = Line(line["idx"], line["length"],
-                                            temp_vertexes)
+                                               temp_vertexes)
             temp_graph = Graph(temp_points, temp_lines)
             temp_map = Map(resp["idx"], resp["name"], temp_graph)
-            return Map0Response(result["result_code"], result["response_length"],
-                                temp_map)
+            return Map0Response(result["result_code"],
+                                result["response_length"], temp_map)
 
     @staticmethod
     def response_to_map1_response(result) -> Map1Response:
@@ -149,14 +150,16 @@ class ResponseParser:
                     posts[post["point_idx"]] = temp_storage
 
             for rating in all_ratings.values():
-                ratings[rating["idx"]] = Rating(rating["idx"], rating["name"],
-                                                rating["rating"], rating["town"])
+                ratings[rating["idx"]] = Rating(rating["idx"],
+                                                rating["name"],
+                                                rating["rating"],
+                                                rating["town"])
 
             for train in all_trains:
                 temp_events = list()
                 for event in train["events"]:
-                    temp_events.append(TrainCollisionEvent(1, event["tick"],
-                                    event["train"]))
+                    temp_events.append(
+                        TrainCollisionEvent(1, event["tick"], event["train"]))
                 temp_train = Train(
                         train["cooldown"],
                         temp_events,
@@ -172,8 +175,12 @@ class ResponseParser:
                         train["speed"]
                 )
                 trains[train["idx"]] = temp_train
-            return Map1Response(result["result_code"], result["response_length"],
-                                resp["idx"], posts, ratings, trains),\
+            return Map1Response(result["result_code"],
+                                result["response_length"],
+                                resp["idx"],
+                                posts,
+                                ratings,
+                                trains),\
                 temp_posts_types
 
     @staticmethod
@@ -226,8 +233,8 @@ class ResponseParser:
             for train in resp["trains"]:
                 temp_events = list()
                 for event in train["events"]:
-                    temp_events.append(TrainCollisionEvent(1, event["tick"],
-                                    event["train"]))
+                    temp_events.append(
+                        TrainCollisionEvent(1, event["tick"], event["train"]))
                 temp_train = Train(
                         train["cooldown"],
                         temp_events,
@@ -305,7 +312,7 @@ class ResponseParser:
                                 result["response"])
 
     @staticmethod
-    def response_to_games_response(result) ->GamesResponse:
+    def response_to_games_response(result) -> GamesResponse:
         resp = result["response"]
         games = {}
 
@@ -316,8 +323,9 @@ class ResponseParser:
                                        game["state"])
 
         return GamesResponse(result["result_code"],
-                            result["response_length"],
-                            games)
+                             result["response_length"],
+                             games)
+
 
 def message_to_server(sock, action, json_mode=True, **kwargs):
     '''

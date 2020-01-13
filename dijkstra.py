@@ -46,8 +46,8 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
     for index_of_point in graph.points.keys():
         priority.add_point(index_of_point, float('inf'))
 
-    for line in graph.lines.values():  # creating of adjacency_list, format: {point_idx:[Line1, Line2]}
-        index_a = line.points[0].idx
+    for line in graph.lines.values():  # creating of adjacency_list, format:
+        index_a = line.points[0].idx   # {point_idx:[Line1, Line2]}
         adjacency_list[index_a].append(line)
         index_b = line.points[1].idx
         adjacency_list[index_b].append(line)
@@ -67,9 +67,11 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
                 forbidden_lines_with_trains.append(forbidden_line)
             # adding forbidden point
             else:
-                if value.position == 0 and forbidden_line.points[0].point_type != 1:
+                if value.position == 0 and\
+                        forbidden_line.points[0].point_type != 1:
                     forbidden_trains_points.append(forbidden_line.points[0])
-                if value.position == forbidden_line.length and forbidden_line.points[1].point_type != 1:
+                if value.position == forbidden_line.length and\
+                        forbidden_line.points[1].point_type != 1:
                     forbidden_trains_points.append(forbidden_line.points[1])
 
     while False in dict_of_marks.values():  # dijkstra
@@ -77,12 +79,14 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
         dict_of_marks[index_of_start] = True
         start = index_of_start
         # Delete point with forbidden type
-        if graph.points[start].point_type == forbidden_type or graph.points[start] in forbidden_trains_points:
+        if graph.points[start].point_type == forbidden_type or\
+                graph.points[start] in forbidden_trains_points:
             continue
         for edge in adjacency_list[index_of_start]:
             if edge in forbidden_lines_with_trains:
                 continue
-            index_of_neighbour = edge.points[0 if edge.points[1].idx == start else 1].idx
+            index_of_neighbour = edge.points[
+                0 if edge.points[1].idx == start else 1].idx
             new_path_length = edge.length + dict_of_dist[index_of_start]
             if new_path_length < dict_of_dist[index_of_neighbour]:
                 dict_of_edge_to[index_of_neighbour] = edge
@@ -122,7 +126,8 @@ def the_best_way(graph, start_point, train, all_trains):
     for_market = dijkstra(graph, start_point, train, all_trains, 3)
     for_storage = dijkstra(graph, start_point, train, all_trains, 2)
     home = dijkstra(graph, start_point, train, all_trains)
-    ways = dict(filter(lambda kv: graph.points[kv[0]].point_type == 1, home.items()))
+    ways = dict(filter(lambda kv: graph.points[kv[0]].point_type == 1,
+                       home.items()))
     ways.update(for_market)
     ways.update(for_storage)
     return ways

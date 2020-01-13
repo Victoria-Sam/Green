@@ -235,6 +235,7 @@ class UpgradeResponse(Response):
 class TurnResponse(Response):
     error: str = None
 
+
 @dataclass
 class LogoutResponse(Response):
     error: str = None
