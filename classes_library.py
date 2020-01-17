@@ -12,6 +12,12 @@ event_types = {
     "GAME_OVER": 100
 }
 
+game_states = {
+    1: "INIT",
+    2: "RUN",
+    3: "FINISHED"
+}
+
 
 @dataclass
 class Event:
@@ -72,20 +78,16 @@ class Line:
 
 @dataclass
 class Graph:
-    points: List[Point]
-    lines: List[Line]
+    points: Dict[int, Point]
+    lines: Dict[int, Line]
 
 
 def get_point(graph, idx):
-    for x in graph.points:
-        if x.idx == idx:
-            return x
+    return graph.points[idx]
 
 
 def get_line(graph, idx):
-    for x in graph.lines:
-        if x.idx == idx:
-            return x
+    return graph.lines[idx]
 
 
 @dataclass
@@ -123,8 +125,7 @@ class Town(Post):
     population_capacity: int
     product: int
     product_capacity: int
-
-    # train_cooldown: int
+    train_cooldown: int
 
 
 @dataclass
@@ -165,8 +166,8 @@ class Rating:
 
 @dataclass
 class Train:
-    # cooldown: int
-    # events: List[Event]
+    cooldown: int
+    events: List[Event]
     # fuel: int
     # fuel_capacity: int
     # fuel_consumption: int
@@ -196,7 +197,8 @@ class PlayerResponse(Response):
     name: str
     rating: int
     town: Town
-    trains: List[Train]
+    trains: Dict[int, Train]
+    error: str = None
 
 
 @dataclass
@@ -207,21 +209,21 @@ class Map0Response(Response):
 @dataclass
 class Map1Response(Response):
     idx: int
-    posts: List[Post]
+    posts: Dict[int, Post]
     ratings: Dict[str, Rating]
-    trains: List[Train]
+    trains: Dict[int, Train]
 
 
 @dataclass
 class Map10Response(Response):
     idx: int
-    coordinates: List[PointWithCoordinates]
+    coordinates: Dict[int, PointWithCoordinates]
     size: List[int]
 
 
 @dataclass
-class GamesResponce(Response):
-    games: List[Game]
+class GamesResponse(Response):
+    games: Dict[str, Game]
 
 
 @dataclass
@@ -231,6 +233,11 @@ class UpgradeResponse(Response):
 
 @dataclass
 class TurnResponse(Response):
+    error: str = None
+
+
+@dataclass
+class LogoutResponse(Response):
     error: str = None
 
 
