@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+test_server_messages.py
+server_responses/GAMES.txt
+server_responses/LOGIN.txt
+server_responses/MAP_0.txt
+server_responses/MAP_1.txt
+server_responses/PLAYER.txt
