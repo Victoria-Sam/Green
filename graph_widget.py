@@ -1,4 +1,3 @@
-import networkx as nx
 from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout, QGraphicsScene
 
 from graph_library import RenderArea
@@ -27,8 +26,7 @@ class GraphWidget(QWidget):
 
     def draw_map0(self, l):
         game, edge_labels, types = l[0], l[1], l[2]
-        self.render_area.draw_graph(nx.kamada_kawai_layout(game.nx_graph),
-                                    edge_labels, game, types)
+        self.render_area.draw_graph(edge_labels, game, types)
 
     def update_map1(self, game):
         self.render_area.update_map1(game)

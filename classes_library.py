@@ -149,13 +149,11 @@ class Storage(Post):
     replenishment: int
 
 
-@dataclass
-class PointWithCoordinates:
-    idx: int
-    x: int
-    y: int
-
-
+# @dataclass
+# class PointWithCoordinates:
+#     idx: int
+#     x: int
+#     y: int
 @dataclass
 class Rating:
     idx: str
@@ -217,7 +215,7 @@ class Map1Response(Response):
 @dataclass
 class Map10Response(Response):
     idx: int
-    coordinates: Dict[int, PointWithCoordinates]
+    coordinates: Dict[int, List[float]]
     size: List[int]
 
 

@@ -120,18 +120,18 @@ class RenderArea(QGraphicsView):
         self.antialiased = antialiased
         self.update_view()
 
-    def draw_graph(self, pos, edge_labels, game, types={}):
+    def draw_graph(self, edge_labels, game, types={}):
         '''
         Draw map and starting positions for trains
         '''
         self.scene().clear()
+        for node, node_pos in game.coordinates.items():
+            game.coordinates[node] = [(self.width() // 2 +
+                                       node_pos[0] * self.width() // 2),
+                                      (self.height() - (self.height() // 2 +
+                                       node_pos[1] * self.height() // 2))]
 
-        for node, node_pos in pos.items():
-            pos[node] = [(self.width() // 2 + node_pos[0] * self.width() // 2),
-                         (self.height() - (self.height() // 2 + node_pos[1] *
-                          self.height() // 2))]
-
-        for node, node_pos in pos.items():
+        for node, node_pos in game.coordinates.items():
             best_node = BestNode(node, node_pos[0], node_pos[1], 25, 25)
 
             best_node.setPen(QPen(Qt.black, 2))

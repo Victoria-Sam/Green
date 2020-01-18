@@ -1,6 +1,5 @@
 import socket
 import json
-import networkx as nx
 
 from classes_library import *
 from typing import List, Dict
@@ -178,6 +177,23 @@ class ResponseParser:
                                 ratings,
                                 trains),\
                 temp_posts_types
+
+    @staticmethod
+    def response_to_map10_response(result) -> Map10Response:
+        resp = result["response"]
+        coords = resp["coordinates"]
+        result_coords = {}
+        x_size = resp["size"][0]
+        y_size = resp["size"][1]
+        for point in coords:
+            result_coords[point["idx"]] = [float(point["x"])/x_size,
+                                           float(point["y"])/y_size]
+        return Map10Response(result["result_code"],
+                             result["response_length"],
+                             resp["idx"],
+                             result_coords,
+                             resp["size"]
+                             )
 
     @staticmethod
     def response_to_player_response(result) -> PlayerResponse:

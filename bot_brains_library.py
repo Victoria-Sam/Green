@@ -1,7 +1,6 @@
 import sys
 import traceback
 
-import networkx as nx
 from PyQt5.QtCore import QObject, pyqtSignal, QRunnable, pyqtSlot
 
 from connection import Connection
@@ -127,7 +126,6 @@ class BotBrains(QRunnable):
             self.game.hijackers_cd = 0
             self.game.parasites_cd = 0
             self.game.refugees_cd = 0
-            self.nx_graph = nx.Graph()
             self.draw_map0()
         else:
             self.signals.error.emit('%s %s' % (login_response.result_code,
@@ -162,13 +160,11 @@ class BotBrains(QRunnable):
         map_0_response = Connection().map0()  # it's response now
         if map_0_response.result_code == 0:
             self.game.map = map_0_response.graph_map
-        self.game.nx_graph = nx.Graph()
-        for point in self.game.map.graph.points.values():
-            self.game.nx_graph.add_node(point.idx)
-        for line in self.game.map.graph.lines.values():
-            self.game.nx_graph.add_edge(line.points[0].idx,
-                                        line.points[1].idx,
-                                        length=line.length, idx=line.idx)
+        map_10_response = Connection().map10()
+        if map_10_response.result_code == 0:
+            self.game.coordinates = map_10_response.coordinates
+            self.game.size = map_10_response.size
+
         map_1_response, post_types = Connection().map1()
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts

@@ -30,6 +30,10 @@ class Connection:
         return ResponseParser.response_to_map1_response(
             message_to_server(self.sock, 'MAP', layer=1))
 
+    def map10(self):
+        return ResponseParser.response_to_map10_response(
+            message_to_server(self.sock, 'MAP', layer=10))
+
     def move(self, line_idx, speed, train_idx):
         return ResponseParser.response_to_move_response(
             message_to_server(self.sock, 'MOVE', line_idx=line_idx,
