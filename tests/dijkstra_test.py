@@ -11,11 +11,11 @@ class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.all_trains = {
             1: Train(cooldown=1, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=1, level=1, line_id=3,
-                     next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=0, speed=0),
+                     next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=0, speed=1),
             2: Train(cooldown=2, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=2, level=1, line_id=8,
                      next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=6, speed=0),
             3: Train(cooldown=3, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=3, level=1,
-                     line_id=13, next_level_price=40, player_id='ff4b8b11-8eb7-4c9c', position=5, speed=0),
+                     line_id=13, next_level_price=40, player_id='ff4b8b11-8eb7-4c9c', position=5, speed=-1),
             4: Train(cooldown=4, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=4, level=1,
                      line_id=12, next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349', position=3, speed=0)
         }
@@ -62,9 +62,9 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(result[7][0].idx, 14)
         self.assertEqual(result[7][-1], 9)
         self.assertEqual(result[0][0].idx, 12)
-        self.assertEqual(result[0][1].idx, 7)
-        self.assertEqual(result[0][2].idx, 2)
-        self.assertEqual(result[0][-1], 18)
+        self.assertEqual(result[0][1].idx, 11)
+        self.assertEqual(result[0][2].idx, 10)
+        self.assertEqual(result[0][-1], 17)
         self.assertEqual(result[2][0].idx, 12)
         self.assertEqual(result[2][-1], 3)
 

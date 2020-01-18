@@ -56,7 +56,7 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
     priority.add_point(index_of_start, 0)
     dict_of_dist[index_of_start] = 0
 
-    # finding forbidden points or lines
+    # finding forbidden points or lines with trains
     forbidden_trains_points = []
     forbidden_lines_with_trains = []
     for train_id, value in all_trains.items():
@@ -64,14 +64,15 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
             forbidden_line = graph.lines[value.line_id]
             # adding forbidden line
             if value.position != 0 and value.position != forbidden_line.length:
-                forbidden_lines_with_trains.append(forbidden_line)
+                if all_trains[train].speed != value.speed:
+                    forbidden_lines_with_trains.append(forbidden_line)
             # adding forbidden point
             else:
                 if value.position == 0 and\
-                        forbidden_line.points[0].point_type != 1:
+                        forbidden_line.points[0].point_type != 1 and all_trains[train].speed != value.speed:
                     forbidden_trains_points.append(forbidden_line.points[0])
                 if value.position == forbidden_line.length and\
-                        forbidden_line.points[1].point_type != 1:
+                        forbidden_line.points[1].point_type != 1 and all_trains[train].speed != value.speed:
                     forbidden_trains_points.append(forbidden_line.points[1])
 
     while False in dict_of_marks.values():  # dijkstra
