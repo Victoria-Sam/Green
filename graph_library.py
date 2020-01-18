@@ -105,7 +105,7 @@ class RenderArea(QGraphicsView):
         self.setFrameStyle(QFrame.NoFrame)
         self.setMinimumSize(1150, 600)
         self.antialiased = True
-        self.zoom = 0.9
+        self.zoom = 0.45
 
         render_palette = self.palette()
         render_palette.setColor(self.backgroundRole(), QColor('#f0fff0'))
@@ -127,9 +127,9 @@ class RenderArea(QGraphicsView):
         self.scene().clear()
         for node, node_pos in game.coordinates.items():
             game.coordinates[node] = [(self.width() // 2 +
-                                       node_pos[0] * self.width() // 2),
+                                       node_pos[0] * self.width() // 2) * 4,
                                       (self.height() - (self.height() // 2 +
-                                       node_pos[1] * self.height() // 2))]
+                                       node_pos[1] * self.height() // 2)) * 4]
 
         for node, node_pos in game.coordinates.items():
             best_node = BestNode(node, node_pos[0], node_pos[1], 25, 25)
