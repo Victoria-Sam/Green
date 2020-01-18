@@ -181,9 +181,8 @@ class BotBrains(QRunnable):
                 if temp_point.post_id is not None:
                     temp_point.point_type = post_types[temp_point.idx]
         edge_labels = {
-            (edge[0], edge[1]):
-                [edge[2]['length'], edge[2]['idx']] for edge in list(
-                    self.game.nx_graph.edges(data=True))
+            (line.points[0].idx, line.points[1].idx): [line.length, line.idx]
+            for line in self.game.map.graph.lines.values()
         }
         self.signals.draw_map0.emit(
             [self.game, edge_labels, post_types])
@@ -204,11 +203,11 @@ class BotBrains(QRunnable):
             self.game.refugees_cd -= 1
         for event in player_response.town.events:
             if event.event_type == 2:
-                self.game.hijackers_cd += event.hijackers_power * 2
+                self.game.hijackers_cd += event.hijackers_power * 3
             elif event.event_type == 3:
-                self.game.parasites_cd += event.parasites_power * 2
+                self.game.parasites_cd += event.parasites_power * 3
             elif event.event_type == 4:
-                self.game.refugees_cd += event.refugees_number * 25
+                self.game.refugees_cd += event.refugees_number * 20
             elif event.event_type == 100:
                 self.game_end = True
         map_1_response, _ = Connection().map1()
