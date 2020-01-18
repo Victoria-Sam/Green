@@ -11,7 +11,7 @@ class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.all_trains = {
             1: Train(cooldown=1, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=1, level=1, line_id=3,
-                     next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=5, speed=0),
+                     next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=5, speed=1),
             2: Train(cooldown=2, events=[], goods=0, goods_capacity=40, goods_type=None, train_id=2, level=1, line_id=1,
                      next_level_price=40, player_id='ff4b8b11-8eb7-4c9c-b096-04758349ae52', position=0, speed=0)
         }
