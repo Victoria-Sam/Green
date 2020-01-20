@@ -215,18 +215,21 @@ class BotBrains(QRunnable):
         self.signals.update_map1.emit(self.game)
 
     def check_line(self, line, start_point, speed):
+        print()
         for idx, train in self.game.trains.items():
             if train.speed != 0 and train.line_id == line.idx and train.speed != speed:
                 return False
+        
         finish_point = line.points[0] if line.points[1].idx == start_point.idx\
             else line.points[1]
         if finish_point.point_type == 1:
             return True
         for idx, train in self.game.trains.items():
+            print(train, line)
             if train.speed != 0:
                 line1 = self.game.map.graph.lines[train.line_id]
                 point1 = line1.points[0] if train.speed == -1\
-                    else line1.points[0]
+                    else line1.points[1]
                 distance = train.position if train.speed == -1\
                     else line1.length - train.position
                 if point1.idx == finish_point.idx and distance == line.length:
@@ -238,12 +241,12 @@ class BotBrains(QRunnable):
         rtrain = self.game.trains[train]
         if self.check_line(line, start_point, speed):
             if line.points[0].idx == start_point.idx:
-                print(Connection().move(line.idx, 1, train))
+                Connection().move(line.idx, 1, train)
                 rtrain.speed = 1
                 rtrain.position = 0
                 rtrain.line_id = line.idx
             else:
-                print(Connection().move(line.idx, -1, train))
+                Connection().move(line.idx, -1, train)
                 rtrain.speed = -1
                 rtrain.position = line.length
                 rtrain.line_id = line.idx
@@ -378,7 +381,6 @@ class BotBrains(QRunnable):
                     self.trains_for_armor.pop(idx)
                 self.trains_with_armor += 1
         for idx, train in self.game.trains.items():
-            print(train)
             if train.cooldown == 0:
                 if train.speed == 0:
                     if train.goods == 0:
