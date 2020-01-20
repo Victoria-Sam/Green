@@ -40,6 +40,7 @@ class GraphWidget(QWidget):
         self.move(frame_gm.topLeft())
 
     def closeEvent(self, event):
+        self.connect_widget.ratings_window.close()
         self.connect_widget.game.event_stop.set()
         self.connect_widget.game.threadpool.clear()
         self.connect_widget.show()

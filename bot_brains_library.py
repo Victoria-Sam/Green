@@ -36,6 +36,7 @@ class BotBrainsSignals(QObject):
     result = pyqtSignal(object)
     draw_map0 = pyqtSignal(object)
     update_map1 = pyqtSignal(object)
+    update_ratings = pyqtSignal(object)
 
 
 class BotBrains(QRunnable):
@@ -215,6 +216,8 @@ class BotBrains(QRunnable):
             self.game.home.town = self.game.posts[self.game.home.idx]
             self.game.ratings = map_1_response.ratings
         self.signals.update_map1.emit(self.game)
+        if not self.game.ratings_stop.is_set():
+            self.signals.update_ratings.emit(self.game.ratings)
 
     def check_line(self, line, start_point):
         for idx, train in self.game.trains.items():

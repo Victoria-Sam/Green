@@ -7,6 +7,7 @@ from connection import Connection
 from game import Game
 from graph_widget import GraphWidget
 from popups import SignInPopup, NewGamePopup
+from ratings_widget import RatingsWidget
 
 
 class ConnectWidget(QWidget):
@@ -78,6 +79,8 @@ class ConnectWidget(QWidget):
                 self.hide()
                 self.game_window = GraphWidget(self)
                 self.game_window.show()
+                self.ratings_window = RatingsWidget(self)
+                self.ratings_window.show()
                 self.game = Game(self.game_window, self.user_name,
                                  self.user_password, self.game_name)
         else:
@@ -96,6 +99,8 @@ class ConnectWidget(QWidget):
             self.hide()
             self.game_window = GraphWidget(self)
             self.game_window.show()
+            self.ratings_window = RatingsWidget(self)
+            self.ratings_window.show()
             self.game = Game(self.game_window, self.user_name,
                              self.user_password, self.game_name,
                              self.num_turns, self.num_players)
