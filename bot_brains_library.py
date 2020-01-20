@@ -351,14 +351,14 @@ class BotBrains(QRunnable):
         self.market_train = {}
         self.potential_product = 0
         self.trains_with_armor = 0
-        for idx, train in self.game.trains.items():
+        for idx, train in self.game.own_trains.items():
             if train.goods_type == 2:
                 self.potential_product += train.goods
             if train.goods_type == 1:
                 if self.trains_for_armor.get(idx):
                     self.trains_for_armor.pop(idx)
                 self.trains_with_armor += 1
-        for idx, train in self.game.trains.items():
+        for idx, train in self.game.own_trains.items():
             if train.cooldown == 0:
                 if train.speed == 0:
                     if train.goods == 0:
