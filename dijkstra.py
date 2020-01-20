@@ -61,19 +61,28 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
     forbidden_lines_with_trains = []
     for train_id, value in all_trains.items():
         if train != train_id:
-            forbidden_line = graph.lines[value.line_id]
+            if all_trains[train].position == 0:
+                train_point = graph.lines[all_trains[train].line_id].points[0]
+            elif all_trains[train].position == graph.lines[all_trains[train].line_id].length:
+                train_point = graph.lines[all_trains[train].line_id].points[1]
+            if value.line_id in adjacency_list[train_point.idx]:
+                forbidden_line = graph.lines[value.line_id]
             # adding forbidden line
-            if value.position != 0 and value.position != forbidden_line.length:
-                if all_trains[train].speed != value.speed:
-                    forbidden_lines_with_trains.append(forbidden_line)
-            # adding forbidden point
-            else:
-                if value.position == 0 and\
-                        forbidden_line.points[0].point_type != 1 and all_trains[train].speed != value.speed:
-                    forbidden_trains_points.append(forbidden_line.points[0])
-                if value.position == forbidden_line.length and\
-                        forbidden_line.points[1].point_type != 1 and all_trains[train].speed != value.speed:
-                    forbidden_trains_points.append(forbidden_line.points[1])
+                if value.position != 0 and value.position != forbidden_line.length:
+                    if all_trains[train].position == 0 and value.speed == -1:
+                        forbidden_lines_with_trains.append(forbidden_line)
+                    elif all_trains[train].position == graph.lines[all_trains[train].line_id].length and\
+                            value.speed == 1:
+                        forbidden_lines_with_trains.append(forbidden_line)
+                # adding forbidden point
+                # else:
+                #     if value.position == 0 and\
+                #             forbidden_line.points[0].point_type != 1 and all_trains[train].speed != value.speed:
+                #
+                #         forbidden_trains_points.append(forbidden_line.points[0])
+                #     if value.position == forbidden_line.length and\
+                #             forbidden_line.points[1].point_type != 1 and all_trains[train].speed != value.speed:
+                #         forbidden_trains_points.append(forbidden_line.points[1])
 
     while False in dict_of_marks.values():  # dijkstra
         index_of_start = priority.pop_point()
