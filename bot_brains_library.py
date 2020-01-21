@@ -224,9 +224,10 @@ class BotBrains(QRunnable):
 
     def check_line(self, line, start_point, speed):
         for idx, train in self.game.trains.items():
-            if train.speed != 0 and train.line_id == line.idx and train.speed != speed:
+            if train.speed != 0 and train.line_id == line.idx and\
+                    train.speed != speed:
                 return False
-        
+
         finish_point = line.points[0] if line.points[1].idx == start_point.idx\
             else line.points[1]
         if finish_point.point_type == 1:
@@ -386,7 +387,8 @@ class BotBrains(QRunnable):
             print(train)
             if train.goods_type == 2:
                 if self.train_market.get(train.train_id):
-                    self.market_train[self.train_market.pop(train.train_id)]-=1
+                    self.market_train[
+                        self.train_market.pop(train.train_id)] -= 1
                 self.potential_product += train.goods
                 self.trains_with_product+=1
             if train.goods_type == 3:
@@ -404,4 +406,5 @@ class BotBrains(QRunnable):
                 if self.trains_for_armor.get(idx):
                     self.trains_for_armor.pop(idx)
                 if self.train_market.get(train.train_id):
-                    self.market_train[self.train_market.pop(train.train_id)]-=1
+                    self.market_train[
+                        self.train_market.pop(train.train_id)] -= 1
