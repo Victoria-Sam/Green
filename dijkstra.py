@@ -68,7 +68,8 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
                 my_point = graph.lines[all_trains[train].line_id].points[1]
             forbidden_line = None
             train_point = None
-            if value.position != 0 and value.position != graph.lines[value.line_id].length:
+            if value.position != 0 and value.position != graph.lines[value.line_id].length and\
+                    graph.lines[value.line_id] in adjacency_list[my_point.idx]:
                 forbidden_line = graph.lines[value.line_id]
             elif value.position != 0:
                 train_point = graph.lines[value.line_id].points[1]
@@ -98,9 +99,9 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
                         forbidden_trains_points.append(forbidden_line.points[1])
                     if value.position == forbidden_line.length and\
                             forbidden_line.points[1].point_type != 1:
-                        forbidden_trains_points.append(forbidden_line.points[1])
+                        forbidden_trains_points.append(forbidden_line.points[0])
 
-    while False in dict_of_marks.values():  # dijkstra
+    while False in dict_of_marks.values():  # dijkstra9
         index_of_start = priority.pop_point()
         dict_of_marks[index_of_start] = True
         start = index_of_start
