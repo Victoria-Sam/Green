@@ -139,7 +139,7 @@ class BotBrains(QRunnable):
     def upgrate_trains(self):
         for idx, train in self.game.trains.items():
             if train.next_level_price < self.game.home.town.armor and \
-                    self.game.home.town.armor - train.next_level_price > 50:
+                    self.game.home.town.armor - train.next_level_price > 29:
                 Connection().upgrade([], [train.train_id])
                 self.game.home.town.armor -= train.next_level_price
 
@@ -223,7 +223,6 @@ class BotBrains(QRunnable):
             self.signals.update_ratings.emit(self.game.ratings)
 
     def check_line(self, line, start_point, speed):
-        print()
         for idx, train in self.game.trains.items():
             if train.speed != 0 and train.line_id == line.idx and train.speed != speed:
                 return False
@@ -233,7 +232,6 @@ class BotBrains(QRunnable):
         if finish_point.point_type == 1:
             return True
         for idx, train in self.game.trains.items():
-            print(train, line)
             if train.speed != 0:
                 line1 = self.game.map.graph.lines[train.line_id]
                 point1 = line1.points[0] if train.speed == -1\
@@ -290,21 +288,22 @@ class BotBrains(QRunnable):
         if best_way:
             best_way = best_way[0:-1]
             cur_market = self.train_market.get(train.train_id)
-            if cur_market is None:
-                self.train_market[train.train_id] = best_market
-                if self.market_train.get(best_market) is not None:
-                    self.market_train[best_market] = \
-                    self.market_train[best_market] + 1
-                else:
-                    self.market_train[best_market] = 1
-            elif cur_market != best_market:
-                self.market_train[cur_market]-=1
-                self.train_market[train.train_id] = best_market
-                if self.market_train.get(best_market) is not None:
-                    self.market_train[best_market] = \
-                    self.market_train[best_market] + 1
-                else:
-                    self.market_train[best_market] = 1
+            if best_storage != best_market:
+                if cur_market is None:
+                    self.train_market[train.train_id] = best_market
+                    if self.market_train.get(best_market) is not None:
+                        self.market_train[best_market] = \
+                        self.market_train[best_market] + 1
+                    else:
+                        self.market_train[best_market] = 1
+                elif cur_market != best_market:
+                    self.market_train[cur_market]-=1
+                    self.train_market[train.train_id] = best_market
+                    if self.market_train.get(best_market) is not None:
+                        self.market_train[best_market] = \
+                        self.market_train[best_market] + 1
+                    else:
+                        self.market_train[best_market] = 1
             self.next_line(train, best_way[0])
 
     def choose_way(self, best_storage, best_way_storage, train,
@@ -315,12 +314,15 @@ class BotBrains(QRunnable):
         for key, val in best_ways_markets.items():
             market = self.get_city(key)
             amount_trains = self.market_train.get(market.idx)
-            if amount_trains is None or amount_trains < 2 or train_mark == market.idx:
+            if amount_trains is None or amount_trains < 1 or train_mark == market.idx:
                 if not best_way_market:
                     best_way_market = val
                     best_market = market
-                if self.isEnough(best_way_storage, market,
-                                 val, train, way_home):
+                print(self.market_train)
+                print(sum(self.market_train.values()) + self.trains_with_product)
+                print(self.trains_with_armor)
+                if sum(self.market_train.values()) + self.trains_with_product>=3 \
+                    and self.trains_with_armor + len(self.trains_for_armor) == 0:
                     if best_storage and best_way_storage:
                         return (best_storage, best_way_storage)
                 if min(best_market.product, train.goods_capacity) - \
@@ -353,12 +355,12 @@ class BotBrains(QRunnable):
         way = the_best_way(self.game.map.graph, start_point.idx,
                            train.train_id, self.game.trains).get(
             self.game.home.idx)
-        if self.game.map.graph.lines[way[0].idx].points[0].idx == \
-                start_point.idx:
-            speed = 1
-        else:
-            speed = -1
         if way:
+            if self.game.map.graph.lines[way[0].idx].points[0].idx == \
+                    start_point.idx:
+                speed = 1
+            else:
+                speed = -1
             self.move_trains(way[0].idx, train.train_id, start_point, speed)
 
     def move_for_goods(self, train):
@@ -379,12 +381,15 @@ class BotBrains(QRunnable):
     def find_trains_way(self):
         self.potential_product = 0
         self.trains_with_armor = 0
+        self.trains_with_product = 0
         for idx, train in self.game.trains.items():
+            print(train)
             if train.goods_type == 2:
                 if self.train_market.get(train.train_id):
                     self.market_train[self.train_market.pop(train.train_id)]-=1
                 self.potential_product += train.goods
-            if train.goods_type == 1:
+                self.trains_with_product+=1
+            if train.goods_type == 3:
                 if self.trains_for_armor.get(idx):
                     self.trains_for_armor.pop(idx)
                 self.trains_with_armor += 1
