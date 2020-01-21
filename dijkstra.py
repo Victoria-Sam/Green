@@ -109,7 +109,7 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
                                         value.speed == -1:
                                     forbidden_lines_with_trains.append(forbidden_line)
 
-    while False in dict_of_marks.values():  # dijkstra9
+    while False in dict_of_marks.values():  # dijkstra
         index_of_start = priority.pop_point()
         dict_of_marks[index_of_start] = True
         start = index_of_start

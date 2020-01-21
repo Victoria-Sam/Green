@@ -36,6 +36,8 @@ class BotBrainsSignals(QObject):
     result = pyqtSignal(object)
     draw_map0 = pyqtSignal(object)
     update_map1 = pyqtSignal(object)
+    update_ratings = pyqtSignal(object)
+    game_over = pyqtSignal()
 
 
 class BotBrains(QRunnable):
@@ -170,6 +172,8 @@ class BotBrains(QRunnable):
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
+            self.game.home.town = self.game.posts[self.game.home.idx]
+            self.game.ratings = map_1_response.ratings
         for current_point in self.game.map.graph.points.values():
             if current_point.post_id is not None:
                 current_point.point_type = post_types[current_point.idx]
@@ -200,19 +204,23 @@ class BotBrains(QRunnable):
             self.game.refugees_cd -= 1
         for event in player_response.town.events:
             if event.event_type == 2:
-                self.game.hijackers_cd += event.hijackers_power * 3
+                self.game.hijackers_cd += event.hijackers_power * 8
             elif event.event_type == 3:
-                self.game.parasites_cd += event.parasites_power * 3
+                self.game.parasites_cd += event.parasites_power * 8
             elif event.event_type == 4:
-                self.game.refugees_cd += event.refugees_number * 20
+                self.game.refugees_cd += event.refugees_number * 25
             elif event.event_type == 100:
-                self.game_end = True
+                self.signals.game_over.emit()  # GAME OVER
+                # self.game_end = True
         map_1_response, _ = Connection().map1()
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts
             self.game.trains = map_1_response.trains
             self.game.home.town = self.game.posts[self.game.home.idx]
+            self.game.ratings = map_1_response.ratings
         self.signals.update_map1.emit(self.game)
+        if not self.game.ratings_stop.is_set():
+            self.signals.update_ratings.emit(self.game.ratings)
 
     def check_line(self, line, start_point, speed):
         print()

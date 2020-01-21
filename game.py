@@ -16,6 +16,7 @@ class Game:
         self.num_players = num_players
         self.threadpool = QThreadPool()
         self.event_stop = threading.Event()
+        self.ratings_stop = threading.Event()
         self.screen = screen
 
         self.map = None
@@ -35,6 +36,10 @@ class Game:
         bot_brains.signals.error.connect(self.show_error_mesage)
         bot_brains.signals.draw_map0.connect(self.screen.draw_map0)
         bot_brains.signals.update_map1.connect(self.screen.update_map1)
+        bot_brains.signals.update_ratings.connect(
+            self.screen.connect_widget.ratings_window.update_ratings)
+        bot_brains.signals.game_over.connect(
+            self.screen.connect_widget.ratings_window.set_game_over_text)
 
         # Стартуем бота
         self.threadpool.start(bot_brains)
