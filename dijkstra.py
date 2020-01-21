@@ -99,8 +99,7 @@ def dijkstra(graph, start_point, train, all_trains, forbidden_type=0):
 
                 else:
                     # forbidden_lines_with_trains.append(forbidden_line)
-                    if value.position == 0 or value.position ==\
-                            forbidden_line.length:
+                    if value.position == 0 or value.position == graph.lines[value.line_id].length:
                         if value.speed == 0 and\
                                 forbidden_line.points[0].point_type != 1:
                             forbidden_lines_with_trains.append(forbidden_line)

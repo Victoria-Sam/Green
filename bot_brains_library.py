@@ -138,7 +138,7 @@ class BotBrains(QRunnable):
 
     def upgrate_trains(self):
         for idx, train in self.game.trains.items():
-            if train.next_level_price < self.game.home.town.armor and \
+            if train.next_level_price is not None and train.next_level_price < self.game.home.town.armor and \
                     self.game.home.town.armor - train.next_level_price > 29:
                 Connection().upgrade([], [train.train_id])
                 self.game.home.town.armor -= train.next_level_price
