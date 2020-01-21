@@ -38,6 +38,8 @@ class Game:
         bot_brains.signals.update_map1.connect(self.screen.update_map1)
         bot_brains.signals.update_ratings.connect(
             self.screen.connect_widget.ratings_window.update_ratings)
+        bot_brains.signals.game_over.connect(
+            self.screen.connect_widget.ratings_window.set_game_over_text)
 
         # Стартуем бота
         self.threadpool.start(bot_brains)

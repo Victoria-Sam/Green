@@ -37,6 +37,7 @@ class BotBrainsSignals(QObject):
     draw_map0 = pyqtSignal(object)
     update_map1 = pyqtSignal(object)
     update_ratings = pyqtSignal(object)
+    game_over = pyqtSignal()
 
 
 class BotBrains(QRunnable):
@@ -208,7 +209,8 @@ class BotBrains(QRunnable):
             elif event.event_type == 4:
                 self.game.refugees_cd += event.refugees_number * 25
             elif event.event_type == 100:
-                pass  # self.game_end = True
+                self.signals.game_over.emit()  # GAME OVER
+                # self.game_end = True
         map_1_response, _ = Connection().map1()
         if map_1_response.result_code == 0:
             self.game.posts = map_1_response.posts

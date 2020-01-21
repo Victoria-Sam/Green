@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QGridLayout, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem
+    QTableWidgetItem, QLabel
 
 
 class RatingsWidget(QWidget):
@@ -16,15 +16,23 @@ class RatingsWidget(QWidget):
         self.setWindowTitle('Ratings')
         self.__position_window()
 
+        self.turns_count = 0
+        self.turns_count_label = QLabel('Turn - %s' % self.turns_count)
         self.ratings_table = RatingsTable()
 
         main_layout = QGridLayout()
-        main_layout.addWidget(self.ratings_table)
+        main_layout.addWidget(self.turns_count_label, 0, 0, Qt.AlignCenter)
+        main_layout.addWidget(self.ratings_table, 1, 0)
 
         self.setLayout(main_layout)
 
     def update_ratings(self, ratings):
         self.ratings_table.update_table_data(ratings)
+        self.turns_count += 1
+        self.turns_count_label.setText('Turn - %s' % self.turns_count)
+
+    def set_game_over_text(self):
+        self.setWindowTitle('GAME OVER on %s' % self.turns_count)
 
     def __position_window(self):
         frame_gm = self.frameGeometry()
